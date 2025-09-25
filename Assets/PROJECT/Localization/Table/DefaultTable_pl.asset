@@ -1,0 +1,164 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: DefaultTable_pl
+  m_EditorClassIdentifier: 
+  m_LocaleId:
+    m_Code: pl
+  m_SharedData: {fileID: 11400000, guid: 55446f8592aeeac46acb7a278848b34a, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 518558416896
+    m_Localized: Z powrotem
+    m_Metadata:
+      m_Items: []
+  - m_Id: 483833774080
+    m_Localized: "Wyj\u015Bcie"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373070594048
+    m_Localized: Menu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 460635078656
+    m_Localized: Nowa gra
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12318507008
+    m_Localized: "Gra\u0107"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1704313323520
+    m_Localized: VSynce
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1497316032512
+    m_Localized: Sterownica
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1604430168064
+    m_Localized: FPS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1394022907904
+    m_Localized: Gra
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1408489062400
+    m_Localized: HUD
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1654686318592
+    m_Localized: "Jako\u015B\u0107"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1681022353408
+    m_Localized: Tryb ekranu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1025066762240
+    m_Localized: Ustawienia
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1462125821952
+    m_Localized: Wideo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9258426793984
+    m_Localized: Audio
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9258430988288
+    m_Localized: "D\u017Awi\u0119k"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9258430988289
+    m_Localized: Muzyka
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9258430988290
+    m_Localized: "Efekty d\u017Awi\u0119kowe"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9258430988291
+    m_Localized: Otoczenia
+    m_Metadata:
+      m_Items: []
+  - m_Id: 166117146198016
+    m_Localized: "Rozdzielczo\u015B\u0107 ekranu"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 336218449346560
+    m_Localized: "J\u0119zyk"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 336218487095296
+    m_Localized: Klawiatura
+    m_Metadata:
+      m_Items: []
+  - m_Id: 336218487095297
+    m_Localized: Kontroler
+    m_Metadata:
+      m_Items: []
+  - m_Id: 726718545231872
+    m_Localized: "Czy na pewno chcesz zresetowa\u0107 ten klucz?"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 726718578786304
+    m_Localized: "Czy na pewno chcesz ponownie powi\u0105za\u0107 ten klucz?"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17607050762485760
+    m_Localized: "Wzn\xF3w"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 21041412942168064
+    m_Localized: "Poka\u017C FPS"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 21041412979916800
+    m_Localized: "Wra\u017Cliwo\u015B\u0107"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24917243263287296
+    m_Localized: Tak
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24917243309424640
+    m_Localized: NIE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24917243309424654
+    m_Localized: "To jest test systemu dialogowego, odbi\xF3r-odbi\xF3r, jak s\u0142yszysz?
+      Czy s\u0142yszysz dobrze?"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24917243309424655
+    m_Localized: "Tak czy inaczej test dobiega ko\u0144ca!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 24917243309424656
+    m_Localized: "Mi\u0142ego testowania!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 25364340840169472
+    m_Localized: "Wskaz\xF3wki dotycz\u0105ce sterowania"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 34714563836215296
+    m_Localized: "Nastawi\u0107"
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

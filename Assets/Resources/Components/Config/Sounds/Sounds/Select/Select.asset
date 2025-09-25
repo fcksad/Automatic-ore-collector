@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 346a38e715474eb4ea0cf8ce58569643, type: 3}
+  m_Name: Select
+  m_EditorClassIdentifier: 
+  <AudioName>k__BackingField: Select
+  <Type>k__BackingField: 0
+  <OneShoot>k__BackingField: 1
+  <SpatialBlend>k__BackingField: 0
+  <AudioClips>k__BackingField:
+  - {fileID: 8300000, guid: 78c66933175521e4388097d31361d203, type: 3}
+  MinPitch: 0.93
+  MaxPitch: 1.06

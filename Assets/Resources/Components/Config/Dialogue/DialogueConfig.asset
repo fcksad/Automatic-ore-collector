@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8eb665a20e4c3e4479dcf48bc4885e4a, type: 3}
+  m_Name: DialogueConfig
+  m_EditorClassIdentifier: 
+  <TextNameID>k__BackingField: Test
+  _localizationText:
+  - {fileID: 11400000, guid: ee3792591a77f6b4cb8082ca08abe78b, type: 2}
+  - {fileID: 11400000, guid: fdc66b3df45452e43b19a34b45e98424, type: 2}
+  - {fileID: 11400000, guid: 862315e8e4eff2d45b4fc31de7e668c1, type: 2}
+  _debug:
+  - This is a test of the dialogue system, reception-reception, how do you hear?
+    Can you hear well?
+  - One way or another the test is coming to an end!
+  - Happy testing!
