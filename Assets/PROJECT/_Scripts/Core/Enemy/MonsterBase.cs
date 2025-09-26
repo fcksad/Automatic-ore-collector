@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class MonsterBase : MonoBehaviour, IDamageable
 {
-    public void TakeDamage(float damage)
+    public void ApplyDamage(float damage)
     {
-        Debug.LogError("Taked");
+        Debug.LogWarning(damage);
     }
 
 }

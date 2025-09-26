@@ -45,7 +45,7 @@ public class Projectile : MonoBehaviour
         if (other.TryGetComponent<IDamageable>(out var dmg))
         {
 
-            dmg.TakeDamage(_damage); 
+            //dmg.TakeDamage(_damage); 
             DestroyOrRelease();
             return;
         }

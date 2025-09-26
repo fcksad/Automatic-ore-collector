@@ -3,210 +3,230 @@ using UnityEngine;
 
 public class TurretBase : MonoBehaviour
 {
-    [Header("Setup")]
-    [SerializeField] private TurretConfig _turretConfig;
-    [SerializeField] private Transform _pivot;
-    [SerializeField] private Transform[] _muzzles;
-    [SerializeField] private float _scanInterval = 0.12f;
+    [Header("Config")]
+    [SerializeField] private TurretConfig _config;
+
+    [Header("Parts")]
+    [Tooltip("Rotate around Y (base yaw)")]
+    [SerializeField] private Transform basePivot;   
+    [Tooltip("Rotate around X (head pitch) - local X rotates head up/down")]
+    [SerializeField] private Transform headPivot;  
+    [Tooltip("Where raycast starts and muzzle particle is placed")]
+    [SerializeField] private Transform muzzle;
+
+    private Transform _target;
+    private float _nextFireTime;
+    private float _nextScanTime;
 
 
-    [SerializeField] private IInstantiateFactoryService _factory;
+    private Quaternion _baseInitialRotWorld;
+    private Quaternion _headInitialRotLocal;
+    private float _halfHor;   
+    private float _halfVer;   
 
-    private float _shootCooldown;
-    private float _scanTimer;
-    private Transform _currentTarget;
-
-    private readonly Collider2D[] _scanBuffer = new Collider2D[64];
 
     private void Awake()
     {
-        if (_pivot == null) _pivot = transform;
-        _factory ??= ServiceLocator.Get<IInstantiateFactoryService>();
+        if (!basePivot) basePivot = transform;
+        if (!headPivot) headPivot = basePivot;
+        if (!muzzle) muzzle = headPivot;
+
+        _baseInitialRotWorld = basePivot.rotation;
+        _headInitialRotLocal = headPivot.localRotation;
+
+        _halfHor = Mathf.Max(0f, _config.MaxHorizontalAngle * 0.5f);
+        _halfVer = Mathf.Max(0f, _config.MaxVerticalAngle * 0.5f);
     }
 
     private void Update()
     {
-        float dt = Time.deltaTime;
-
-        // 1) Переодический поиск целей
-        _scanTimer -= dt;
-        if (_scanTimer <= 0f)
+        if (Time.time >= _nextScanTime)
         {
-            _scanTimer = _scanInterval;
-            _currentTarget = FindBestTarget();
+            _nextScanTime = Time.time + _config.ScanInterval;
+            AcquireTargetInRadius();
         }
 
-        // 2) Наведение с ограничением дуги, где база считается от корпуса // CHANGED
-        float baseYaw = GetBaseYawFromParent(); // центр полудуги
-        float desiredWorldYaw = baseYaw;
-
-        if (_currentTarget != null && IsTargetValid(_currentTarget))
+        if (_target)
         {
-            Vector2 toTarget = _currentTarget.position - _pivot.position;
-            // CHANGED: -90f (up-система) и минус офсет спрайта
-            desiredWorldYaw = Mathf.Atan2(toTarget.y, toTarget.x) * Mathf.Rad2Deg - 90f - _turretConfig.SpriteForwardOffsetDeg;
+            AimAtTarget(Time.deltaTime);
+            TryFireShot();
         }
-        else
+        else if (_config.ReturnToRest)
         {
-            desiredWorldYaw = baseYaw;
-        }
-
-        float clampedWorldYaw = ClampWorldYawToLimits(baseYaw, desiredWorldYaw); // CHANGED
-        float newYaw = Mathf.MoveTowardsAngle(_pivot.eulerAngles.z, clampedWorldYaw, _turretConfig.RotationSpeed * dt);
-        _pivot.rotation = Quaternion.Euler(0f, 0f, newYaw);
-
-        // 3) Стрельба при сведении
-        _shootCooldown -= dt;
-        if (_currentTarget != null && _shootCooldown <= 0f)
-        {
-            float aimError = Mathf.Abs(Mathf.DeltaAngle(newYaw, desiredWorldYaw));
-            if (aimError <= _turretConfig.FireAngleTolerance && IsTargetWithinArc(_currentTarget.position)) // IsTargetWithinArc уже использует новую базу
-            {
-                Fire();
-                _shootCooldown = (_turretConfig.FireRate > 0f) ? (1f / _turretConfig.FireRate) : 0f;
-            }
+            ReturnToRest(Time.deltaTime);
         }
     }
 
-    private float GetBaseYawFromParent()
+    private void AcquireTargetInRadius()
     {
-        float parentYaw = _pivot.parent ? _pivot.parent.eulerAngles.z : 0f;
-        float anchorOffset = _turretConfig.Anchor switch
-        {
-            ArcAnchor.Front => 0f,
-            ArcAnchor.Back => 180f,
-            ArcAnchor.Left => -90f,
-            ArcAnchor.Right => 90f,
-            ArcAnchor.Custom => _turretConfig.CustomAnchorOffsetDeg,
-            _ => 0f
-        };
-        return parentYaw + anchorOffset - _turretConfig.SpriteForwardOffsetDeg;
-    }
+        _target = null;
 
-    private Transform FindBestTarget()
-    {
-        int count = Physics2D.OverlapCircleNonAlloc(_pivot.position, _turretConfig.DetectionRadius, _scanBuffer, _turretConfig.DamageableMask);
+        Collider[] hits = Physics.OverlapSphere(basePivot.position, _config.DetectionRadius, _config.TargetMask, QueryTriggerInteraction.Ignore);
+        if (hits == null || hits.Length == 0) return;
 
-        float bestDistSq = float.PositiveInfinity;
+        float bestSqr = float.PositiveInfinity;
         Transform best = null;
 
-        for (int i = 0; i < count; i++)
+        Vector3 origin = basePivot.position;
+        foreach (var h in hits)
         {
-            var col = _scanBuffer[i];
-            if (col == null) continue;
-            if (!col.TryGetComponent(out IDamageable dmg)) continue;
+            if (!h || h.transform == transform) continue;
 
-            Vector3 pos = col.transform.position;
-            if (!IsTargetWithinArc(pos)) continue; // фильтр по полудуге
+            Vector3 to = h.bounds.center - origin;
+            to.y = 0f; 
 
-            float d2 = (pos - _pivot.position).sqrMagnitude;
-            if (d2 < bestDistSq)
+            float sqr = to.sqrMagnitude;
+            if (sqr < bestSqr)
             {
-                bestDistSq = d2;
-                best = col.transform;
+                bestSqr = sqr;
+                best = h.transform;
             }
         }
-        return best;
+
+        _target = best;
     }
 
-    private bool IsTargetValid(Transform t)
+    private void AimAtTarget(float dt)
     {
-        if (t == null) return false;
-        if (((1 << t.gameObject.layer) & _turretConfig.DamageableMask.value) == 0) return false;
-        if (!t.TryGetComponent<IDamageable>(out _)) return false;
-        float dist = Vector2.Distance(_pivot.position, t.position);
-        if (dist > _turretConfig.DetectionRadius) return false;
-        return IsTargetWithinArc(t.position); // CHANGED: сразу учитываем полудугу
-    }
+        if (!_target) return;
 
-    // полудуга вокруг GetBaseYawFromParent // CHANGED
-    private bool IsTargetWithinArc(Vector3 worldPos)
-    {
-        float baseYaw = GetBaseYawFromParent();
-        Vector2 dir = worldPos - _pivot.position;
-        // CHANGED: - офсет
-        float worldYaw = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90f - _turretConfig.SpriteForwardOffsetDeg;
-        float rel = Mathf.DeltaAngle(baseYaw, worldYaw);
-        return rel >= _turretConfig.YawMinDeg && rel <= _turretConfig.YawMaxDeg;
-    }
+        Vector3 origin = basePivot.position;
+        Vector3 toTarget = _target.position - origin;
 
-    // clamp к дуге, центрированной на базе (родительский курс + якорь) // CHANGED
-    private float ClampWorldYawToLimits(float baseYaw, float desiredWorldYaw)
-    {
-        float rel = Mathf.DeltaAngle(baseYaw, desiredWorldYaw);
-        float clampedRel = Mathf.Clamp(rel, _turretConfig.YawMinDeg, _turretConfig.YawMaxDeg);
-        return baseYaw + clampedRel;
-    }
-
-    private void Fire()
-    {
-        if (_turretConfig.ProjectilePrefab == null) return;
-
-        // общий «боевой вперёд» с офсетом
-        Vector2 forward = Quaternion.Euler(0, 0, _turretConfig.SpriteForwardOffsetDeg) * _pivot.up;
-
-        if (_muzzles == null || _muzzles.Length == 0)
+        Vector3 toFlat = toTarget; toFlat.y = 0f;
+        if (toFlat.sqrMagnitude > 0.0001f)
         {
-            SpawnProjectile(_pivot.position, forward);
-            return;
+            toFlat.Normalize();
+
+            Vector3 baseInitialFwd = _baseInitialRotWorld * Vector3.forward;
+            float desiredYaw = SignedAngleOnPlane(baseInitialFwd, toFlat, Vector3.up);
+            float clampedYaw = Mathf.Clamp(desiredYaw, -_halfHor, _halfHor);
+
+            Quaternion targetBaseRot = Quaternion.AngleAxis(clampedYaw, Vector3.up) * _baseInitialRotWorld;
+
+            basePivot.rotation = Quaternion.RotateTowards(basePivot.rotation, targetBaseRot, _config.HorizontalRotationSpeed * dt);
         }
 
-        for (int i = 0; i < _muzzles.Length; i++)
+        Vector3 headPos = headPivot.position;
+        Vector3 lookDir = (_target.position - headPos);
+        if (lookDir.sqrMagnitude > 0.0001f)
         {
-            var mz = _muzzles[i];
-            if (mz == null) continue;
+            Quaternion desiredHeadWorld = Quaternion.LookRotation(lookDir.normalized, Vector3.up);
+            Transform parent = headPivot.parent ? headPivot.parent : basePivot.parent;
+            Quaternion parentWorld = parent ? parent.rotation : Quaternion.identity;
+            Quaternion desiredLocal = Quaternion.Inverse(parentWorld) * desiredHeadWorld;
 
-            float spread = (_turretConfig.SpreadDeg > 0f)
-                ? Random.Range(-_turretConfig.SpreadDeg, _turretConfig.SpreadDeg)
-                : 0f;
+            Vector3 initLocalEuler = _headInitialRotLocal.eulerAngles;
+            float initPitch = NormalizeAngle(initLocalEuler.x);
+            float desiredPitch = NormalizeAngle(desiredLocal.eulerAngles.x);
 
-            // CHANGED: спред добавляем к «боевому вперёд»
-            Vector2 dir = Quaternion.Euler(0, 0, spread) * forward;
-            SpawnProjectile(mz.position, dir);
+            float deltaFromInit = DeltaAngle(initPitch, desiredPitch);
+            float clampedDelta = Mathf.Clamp(deltaFromInit, -_halfVer, _halfVer);
+            float finalPitch = initPitch + clampedDelta;
+
+            Vector3 targetLocalEuler = desiredLocal.eulerAngles;
+            targetLocalEuler.x = WrapAngle(finalPitch);
+
+            Quaternion targetLocalRot = Quaternion.Euler(targetLocalEuler);
+            headPivot.localRotation = Quaternion.RotateTowards(headPivot.localRotation, targetLocalRot, _config.VerticalRotationSpeed * dt);
         }
     }
 
-    private void SpawnProjectile(Vector3 pos, Vector2 dir)
+    private void ReturnToRest(float dt)
     {
-        Projectile proj;
-        if (_factory != null)
-            proj = _factory.Create(_turretConfig.ProjectilePrefab, position: pos, rotation: Quaternion.LookRotation(Vector3.forward, dir));
+        basePivot.rotation = Quaternion.RotateTowards(
+            basePivot.rotation, _baseInitialRotWorld, _config.HorizontalRotationSpeed * _config.ReturnSpeedMul * dt);
+
+        headPivot.localRotation = Quaternion.RotateTowards(
+            headPivot.localRotation, _headInitialRotLocal, _config.VerticalRotationSpeed * _config.ReturnSpeedMul * dt);
+    }
+
+    // ----------- Firing -----------
+
+    private void TryFireShot()
+    {
+        if (Time.time < _nextFireTime) return;
+        if (!muzzle) return;
+
+        Vector3 origin = muzzle.position;
+        Vector3 dir = muzzle.forward;
+
+        if (_target)
+        {
+            Vector3 toTarget = (_target.position - origin).normalized;
+            float aimErr = Vector3.Angle(dir, toTarget);
+            if (aimErr > _config.FireAngleTolerance)
+                return;
+        }
+
+        if (Physics.Raycast(origin, dir, out RaycastHit hit, _config.DetectionRadius, _config.TargetMask, QueryTriggerInteraction.Ignore))
+        {
+            _nextFireTime = Time.time + 1f / Mathf.Max(0.0001f, _config.FireRate);
+
+
+/*            if (_config.MuzzleParticle)
+                _config.MuzzleParticle.Play(true);*/
+
+            var dmg = hit.collider.GetComponentInParent<IDamageable>();
+            if (dmg != null)
+            {
+                dmg.ApplyDamage(_config.Damage);
+                Debug.Log($"[Turret] Hit {hit.collider.name} damage={_config.Damage:0.##} at {hit.point}");
+            }
+            else
+            {
+                Debug.Log($"[Turret] Ray hit {hit.collider.name} (no IDamageable) at {hit.point}");
+            }
+        }
         else
-            proj = Instantiate(_turretConfig.ProjectilePrefab, pos, Quaternion.LookRotation(Vector3.forward, dir));
+        {
 
-        proj.Launch(
-            dir: dir.normalized,
-            speed: _turretConfig.ProjectileSpeed,
-            damage: _turretConfig.Damage,
-            lifeTime: 5f,
-            _factory,
-            owner: this.transform
-        );
+        }
     }
-#if UNITY_EDITOR
+
+
+    // нормализует угол к диапазону [-180, 180]
+    private static float NormalizeAngle(float euler)
+    {
+        float a = Mathf.Repeat(euler + 180f, 360f) - 180f;
+        return a;
+    }
+
+    // возвращает a-b в пределах [-180,180]
+    private static float DeltaAngle(float from, float to)
+    {
+        return Mathf.DeltaAngle(from, to);
+    }
+
+    // оборачивает в [0,360) для записи в euler
+    private static float WrapAngle(float signed)
+    {
+        return (signed % 360f + 360f) % 360f;
+    }
+
+    // подписанный угол между vFrom и vTo на заданной плоскости (нормаль planeN)
+    private static float SignedAngleOnPlane(Vector3 vFrom, Vector3 vTo, Vector3 planeN)
+    {
+        vFrom = Vector3.ProjectOnPlane(vFrom, planeN).normalized;
+        vTo = Vector3.ProjectOnPlane(vTo, planeN).normalized;
+        if (vFrom.sqrMagnitude < 1e-6f || vTo.sqrMagnitude < 1e-6f) return 0f;
+        float unsigned = Vector3.Angle(vFrom, vTo);
+        float sign = Mathf.Sign(Vector3.Dot(planeN, Vector3.Cross(vFrom, vTo)));
+        return unsigned * sign;
+    }
+
     private void OnDrawGizmosSelected()
     {
-        if (_turretConfig == null) return;
+        // радиус обнаружения
+        Gizmos.color = new Color(0f, 1f, 1f, 0.25f);
+        Gizmos.DrawWireSphere(basePivot ? basePivot.position : transform.position, _config.DetectionRadius);
 
-        var pivot = _pivot ? _pivot : transform;
-
-        float designBase =
-            (pivot.parent ? pivot.parent.eulerAngles.z : 0f) +
-            (_turretConfig.Anchor == ArcAnchor.Custom ? _turretConfig.CustomAnchorOffsetDeg :
-             _turretConfig.Anchor == ArcAnchor.Right ? 90f :
-             _turretConfig.Anchor == ArcAnchor.Left ? -90f :
-             _turretConfig.Anchor == ArcAnchor.Back ? 180f : 0f)
-            // CHANGED:
-            - _turretConfig.SpriteForwardOffsetDeg;
-
-        UnityEditor.Handles.color = new Color(0f, 1f, 0f, 0.15f);
-        UnityEditor.Handles.DrawSolidDisc(pivot.position, Vector3.forward, _turretConfig.DetectionRadius);
-
-        UnityEditor.Handles.color = new Color(1f, 0.7f, 0f, 0.9f);
-        float start = designBase + _turretConfig.YawMinDeg;
-        float sweep = _turretConfig.YawMaxDeg - _turretConfig.YawMinDeg;
-        UnityEditor.Handles.DrawWireArc(pivot.position, Vector3.forward,
-            Quaternion.Euler(0, 0, start) * Vector3.up, sweep, _turretConfig.DetectionRadius);
+        // луч выстрела
+        if (muzzle)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(muzzle.position, muzzle.position + muzzle.forward * _config.DetectionRadius);
+        }
     }
-#endif
+   
 }
