@@ -18,12 +18,16 @@ public class TurretBase : MonoBehaviour
     private float _nextFireTime;
     private float _nextScanTime;
 
+    private bool _returning = false;
+
 
     private Quaternion _baseInitialRotWorld;
     private Quaternion _headInitialRotLocal;
     private float _halfHor;   
     private float _halfVer;   
 
+
+    private IAudioService _audioService;
 
     private void Awake()
     {
@@ -36,6 +40,8 @@ public class TurretBase : MonoBehaviour
 
         _halfHor = Mathf.Max(0f, _config.MaxHorizontalAngle * 0.5f);
         _halfVer = Mathf.Max(0f, _config.MaxVerticalAngle * 0.5f);
+
+        _audioService = ServiceLocator.Get<IAudioService>();
     }
 
     private void Update()
@@ -130,6 +136,8 @@ public class TurretBase : MonoBehaviour
             Quaternion targetLocalRot = Quaternion.Euler(targetLocalEuler);
             headPivot.localRotation = Quaternion.RotateTowards(headPivot.localRotation, targetLocalRot, _config.VerticalRotationSpeed * dt);
         }
+
+        _returning = false;
     }
 
     private void ReturnToRest(float dt)
@@ -139,6 +147,13 @@ public class TurretBase : MonoBehaviour
 
         headPivot.localRotation = Quaternion.RotateTowards(
             headPivot.localRotation, _headInitialRotLocal, _config.VerticalRotationSpeed * _config.ReturnSpeedMul * dt);
+
+        if (_returning == false)
+        {
+            _returning = true;
+            _audioService.Play(_config.NoTargetSound, parent: transform, position: transform.position, maxSoundDistance: _config.MaxDistanceSound);
+        }
+
     }
 
     // ----------- Firing -----------
@@ -164,8 +179,9 @@ public class TurretBase : MonoBehaviour
             _nextFireTime = Time.time + 1f / Mathf.Max(0.0001f, _config.FireRate);
 
 
-/*            if (_config.MuzzleParticle)
-                _config.MuzzleParticle.Play(true);*/
+            _audioService.Play(_config.ShotSound, parent: transform, position: transform.position, maxSoundDistance: _config.MaxDistanceSound);
+            /*            if (_config.MuzzleParticle)
+                            _config.MuzzleParticle.Play(true);*/
 
             var dmg = hit.collider.GetComponentInParent<IDamageable>();
             if (dmg != null)
@@ -184,27 +200,22 @@ public class TurretBase : MonoBehaviour
         }
     }
 
-
-    // нормализует угол к диапазону [-180, 180]
     private static float NormalizeAngle(float euler)
     {
         float a = Mathf.Repeat(euler + 180f, 360f) - 180f;
         return a;
     }
 
-    // возвращает a-b в пределах [-180,180]
     private static float DeltaAngle(float from, float to)
     {
         return Mathf.DeltaAngle(from, to);
     }
 
-    // оборачивает в [0,360) для записи в euler
     private static float WrapAngle(float signed)
     {
         return (signed % 360f + 360f) % 360f;
     }
 
-    // подписанный угол между vFrom и vTo на заданной плоскости (нормаль planeN)
     private static float SignedAngleOnPlane(Vector3 vFrom, Vector3 vTo, Vector3 planeN)
     {
         vFrom = Vector3.ProjectOnPlane(vFrom, planeN).normalized;
@@ -217,11 +228,9 @@ public class TurretBase : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        // радиус обнаружения
         Gizmos.color = new Color(0f, 1f, 1f, 0.25f);
         Gizmos.DrawWireSphere(basePivot ? basePivot.position : transform.position, _config.DetectionRadius);
 
-        // луч выстрела
         if (muzzle)
         {
             Gizmos.color = Color.red;

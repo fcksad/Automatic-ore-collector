@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 346a38e715474eb4ea0cf8ce58569643, type: 3}
+  m_Name: twin_turret_01
+  m_EditorClassIdentifier: 
+  <AudioName>k__BackingField: twin_turret_01
+  <Type>k__BackingField: 2
+  <OneShoot>k__BackingField: 0
+  <AudioClips>k__BackingField:
+  - {fileID: 8300000, guid: d31eb442135e26346ad853314a73034c, type: 3}
+  - {fileID: 8300000, guid: 738e40a005bc4ad4b83469943b1311ce, type: 3}
+  - {fileID: 8300000, guid: c9813a0b2488bf046a02547e9fa3c0fb, type: 3}
+  - {fileID: 8300000, guid: 308a7178fc90cd3458f6ca7be0dfdfd6, type: 3}
+  SpatialBlend: 1
+  MinPitch: 0.85
+  MaxPitch: 0.95

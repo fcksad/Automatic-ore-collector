@@ -7,8 +7,8 @@ public class AudioConfig : ScriptableObject
     [field: SerializeField] public string AudioName { get; private set; }
     [field: SerializeField] public AudioType Type { get; private set; }
     [field: SerializeField] public bool OneShoot { get; private set; } = true;
-    [field: SerializeField] public float SpatialBlend { get; private set; } = 0;
     [field: SerializeField] public List<AudioClip> AudioClips { get; private set; }
+    [Range(0, 1f)] public float SpatialBlend = 0;
     [Range(-3, 3)] public float MinPitch = 1f;
     [Range(-3, 3)] public float MaxPitch = 1f;
 

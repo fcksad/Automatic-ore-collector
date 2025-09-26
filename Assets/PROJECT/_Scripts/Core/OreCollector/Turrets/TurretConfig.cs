@@ -20,7 +20,17 @@ public class TurretConfig : ScriptableObject
     [Tooltip("Allow shooting only when muzzle is within this angle to target (deg)")]
     [field: SerializeField] public float FireAngleTolerance { get; private set; } = 6f;
 
+
+    [Tooltip("Effects")]
     [field: SerializeField] public ParticleSystem MuzzleParticle { get; private set; }
+
+    [Tooltip("Sound")]
+    [field: SerializeField] public AudioConfig ShotSound { get; private set; }
+    [field: SerializeField] public AudioConfig NoTargetSound { get; private set; }
+
+    [Range(1, 100)] public float MaxDistanceSound = 30f;
+
+
 
     [Header("Behavior")]
     [Tooltip("Time between target reacquire scans")]

@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 346a38e715474eb4ea0cf8ce58569643, type: 3}
+  m_Name: turret_shot_01
+  m_EditorClassIdentifier: 
+  <AudioName>k__BackingField: turret_shot_01
+  <Type>k__BackingField: 2
+  <OneShoot>k__BackingField: 0
+  <AudioClips>k__BackingField:
+  - {fileID: 8300000, guid: 56b33a9005577c0489b3bce54c67a7f5, type: 3}
+  - {fileID: 8300000, guid: f60524e96f824674fa93a7dd838cd361, type: 3}
+  - {fileID: 8300000, guid: 037bb8f921226c4469362645a14b5ff2, type: 3}
+  - {fileID: 8300000, guid: 4afd6fa78e9786445b2880d48567336c, type: 3}
+  - {fileID: 8300000, guid: 9d7f5afcc31d2c74ca2ffa2a009a300d, type: 3}
+  - {fileID: 8300000, guid: f9d77a46679360c4caadd3720629f5cf, type: 3}
+  SpatialBlend: 1
+  MinPitch: 0.85
+  MaxPitch: 0.95
