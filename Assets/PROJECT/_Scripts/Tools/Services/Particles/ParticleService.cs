@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Service
 {
-    public class ParticleService : IParticleService, IInitializable
+    public class ParticleService : IParticleService, IInitializable, IDisposable
     {
         private Transform _root;
         private readonly List<ParticleController> _active = new();
@@ -57,6 +57,11 @@ namespace Service
                 Object.Destroy(c.gameObject);
             }
             _active.Clear();
+        }
+
+        public void Dispose()
+        {
+            ClearAll();
         }
     }
 

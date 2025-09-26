@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c8ca144c34cb314e8c90d0c5a78910b, type: 3}
+  m_Name: DoubleTurrets
+  m_EditorClassIdentifier: 
+  <TurretId>k__BackingField: 0
+  <HorizontalRotationSpeed>k__BackingField: 40
+  <VerticalRotationSpeed>k__BackingField: 40
+  <MaxVerticalAngle>k__BackingField: 70
+  <MaxHorizontalAngle>k__BackingField: 360
+  <TargetMask>k__BackingField:
+    serializedVersion: 2
+    m_Bits: 256
+  <DetectionRadius>k__BackingField: 28
+  <FireRate>k__BackingField: 12
+  <Damage>k__BackingField: 2
+  <FireAngleTolerance>k__BackingField: 2
+  <MuzzleParticle>k__BackingField: {fileID: 4356469530381987533, guid: e5a0c337e8f45a34fadac26068500d99, type: 3}
+  <ShotSound>k__BackingField: {fileID: 11400000, guid: a8e7e6c294325c64fad012d0dfab3bc5, type: 2}
+  <NoTargetSound>k__BackingField: {fileID: 11400000, guid: 6bf8983f7d1609c4bb88bfb1eb6eb12f, type: 2}
+  MaxDistanceSound: 30
+  <ScanInterval>k__BackingField: 0.15
+  <ReturnToRest>k__BackingField: 1
+  <ReturnSpeedMul>k__BackingField: 0.5

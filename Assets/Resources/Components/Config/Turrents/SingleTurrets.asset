@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7c8ca144c34cb314e8c90d0c5a78910b, type: 3}
-  m_Name: TurretConfig
+  m_Name: SingleTurrets
   m_EditorClassIdentifier: 
   <TurretId>k__BackingField: 0
   <HorizontalRotationSpeed>k__BackingField: 40
   <VerticalRotationSpeed>k__BackingField: 40
-  <MaxVerticalAngle>k__BackingField: 20
+  <MaxVerticalAngle>k__BackingField: 70
   <MaxHorizontalAngle>k__BackingField: 360
   <TargetMask>k__BackingField:
     serializedVersion: 2
     m_Bits: 256
   <DetectionRadius>k__BackingField: 30
-  <FireRate>k__BackingField: 8.7
+  <FireRate>k__BackingField: 8
   <Damage>k__BackingField: 1
   <FireAngleTolerance>k__BackingField: 2
   <MuzzleParticle>k__BackingField: {fileID: 4356469530381987533, guid: e5a0c337e8f45a34fadac26068500d99, type: 3}

@@ -1,4 +1,5 @@
 using Service;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class TurretBase : MonoBehaviour
@@ -12,7 +13,7 @@ public class TurretBase : MonoBehaviour
     [Tooltip("Rotate around X (head pitch) - local X rotates head up/down")]
     [SerializeField] private Transform _headPivot;  
     [Tooltip("Where raycast starts and muzzle particle is placed")]
-    [SerializeField] private Transform _muzzlePos;
+    [SerializeField] private List<Transform> _muzzlePos;
 
     private Transform _target;
     private float _nextFireTime;
@@ -32,10 +33,6 @@ public class TurretBase : MonoBehaviour
 
     private void Awake()
     {
-        if (!_basePivot) _basePivot = transform;
-        if (!_headPivot) _headPivot = _basePivot;
-        if (!_muzzlePos) _muzzlePos = _headPivot;
-
         _baseInitialRotWorld = _basePivot.rotation;
         _headInitialRotLocal = _headPivot.localRotation;
 
@@ -160,10 +157,9 @@ public class TurretBase : MonoBehaviour
     private void TryFireShot()
     {
         if (Time.time < _nextFireTime) return;
-        if (!_muzzlePos) return;
 
-        Vector3 origin = _muzzlePos.position;
-        Vector3 dir = _muzzlePos.forward;
+        Vector3 origin = _headPivot.position;
+        Vector3 dir = _headPivot.forward;
 
         if (_target)
         {
@@ -179,7 +175,11 @@ public class TurretBase : MonoBehaviour
 
 
             _audioService.Play(_config.ShotSound, parent: transform, position: transform.position, maxSoundDistance: _config.MaxDistanceSound);
-            _particleService.Play(_config.MuzzleParticle, _muzzlePos, _muzzlePos.position, _muzzlePos.rotation);
+
+            foreach (var muzzle in _muzzlePos)
+            {
+                _particleService.Play(_config.MuzzleParticle, muzzle, muzzle.position, muzzle.rotation);
+            }
 
             var dmg = hit.collider.GetComponentInParent<IDamageable>();
             if (dmg != null)
@@ -229,10 +229,10 @@ public class TurretBase : MonoBehaviour
         Gizmos.color = new Color(0f, 1f, 1f, 0.25f);
         Gizmos.DrawWireSphere(_basePivot ? _basePivot.position : transform.position, _config.DetectionRadius);
 
-        if (_muzzlePos)
+        if (_headPivot)
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawLine(_muzzlePos.position, _muzzlePos.position + _muzzlePos.forward * _config.DetectionRadius);
+            Gizmos.DrawLine(_headPivot.position, _headPivot.position + _headPivot.forward * _config.DetectionRadius);
         }
     }
    
