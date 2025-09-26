@@ -5,13 +5,18 @@ using UnityEngine;
 public class VehicleController : MonoBehaviour
 {
     [SerializeField] private List<IControllable> _controllables = new List<IControllable>();
+    [SerializeField] private List<VehicleBase> _allVehicles = new List<VehicleBase>();
+
 
     private IInputService _inputService;
+    private IInstantiateFactoryService _instantiateFactory;
 
     private void Awake()
     {
         _inputService = ServiceLocator.Get<IInputService>();
         _inputService.ChangeInputMap(InputMapType.Player);
+
+        _instantiateFactory = ServiceLocator.Get<IInstantiateFactoryService>();
     }
 
     public void SetVehicle(IControllable controllable)
@@ -31,5 +36,10 @@ public class VehicleController : MonoBehaviour
             c.Move(move);
             c.Rotate(rotate);
         }
+    }
+
+    public List<VehicleBase> GetVehicles()
+    {
+        return _allVehicles;    
     }
 }

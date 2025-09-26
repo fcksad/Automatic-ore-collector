@@ -3,6 +3,8 @@ using UnityEngine;
 
 namespace Menu
 {
+
+    [DefaultExecutionOrder(-650)]
     public class QuickMenuBootstrap : MonoBehaviour
     {
         private SceneServiceLocator _scene;

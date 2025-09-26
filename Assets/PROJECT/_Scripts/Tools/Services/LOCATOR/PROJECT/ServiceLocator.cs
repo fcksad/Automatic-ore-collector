@@ -135,7 +135,7 @@ namespace Service
 
         #region DI factory
 
-
+        public static bool TryGet(Type type, out object obj) => _map.TryGetValue(type, out obj);
         private static object CreateWithInjection(Type implType)
         {
             if (typeof(Component).IsAssignableFrom(implType))

@@ -15,7 +15,7 @@ public class TurretBase : MonoBehaviour
     [Tooltip("Where raycast starts and muzzle particle is placed")]
     [SerializeField] private List<Transform> _muzzlePos;
 
-    private Transform _target;
+    private ITargetable _target;
     private float _nextFireTime;
     private float _nextScanTime;
 
@@ -48,10 +48,11 @@ public class TurretBase : MonoBehaviour
         if (Time.time >= _nextScanTime)
         {
             _nextScanTime = Time.time + _config.ScanInterval;
-            AcquireTargetInRadius();
+            if (!IsTargetValid(_target))
+                AcquireTargetInRadius();
         }
 
-        if (_target)
+        if (_target != null)
         {
             AimAtTarget(Time.deltaTime);
             TryFireShot();
@@ -62,58 +63,109 @@ public class TurretBase : MonoBehaviour
         }
     }
 
+    private void SetTarget(ITargetable t)
+    {
+        if (_target == t) return;
+
+        if (_target != null)
+            _target.BecameUnavailable -= OnTargetUnavailable;
+
+        _target = t;
+
+        if (_target != null)
+            _target.BecameUnavailable += OnTargetUnavailable;
+    }
+
+    private void OnTargetUnavailable(ITargetable t)
+    {
+        if (_target == t)
+            SetTarget(null);
+    }
+
+    private bool IsTargetValid(ITargetable t)
+    {
+        if (t == null) return false;
+        if (!t.IsAlive) return false;
+
+        var tr = t.TargetTransform;
+        if (!tr || !tr.gameObject.activeInHierarchy) return false;
+
+        if ((tr.position - _basePivot.position).sqrMagnitude > _config.DetectionRadius * _config.DetectionRadius)
+            return false;
+
+        Vector3 origin = _headPivot.position;
+        Vector3 dir = (tr.position - origin);
+        float dist = dir.magnitude;
+        if (dist <= 0.001f) return true;
+
+        dir /= dist;
+        if (Physics.Raycast(origin, dir, out var hit, Mathf.Min(dist, _config.DetectionRadius), ~0, QueryTriggerInteraction.Ignore))
+        {
+            if (!hit.transform.IsChildOf(tr)) return false;
+        }
+        return true;
+    }
+
     private void AcquireTargetInRadius()
     {
-        _target = null;
+        SetTarget(null);
 
-        Collider[] hits = Physics.OverlapSphere(_basePivot.position, _config.DetectionRadius, _config.TargetMask, QueryTriggerInteraction.Ignore);
+        var hits = Physics.OverlapSphere(_basePivot.position, _config.DetectionRadius,
+                                         _config.TargetMask, QueryTriggerInteraction.Ignore);
         if (hits == null || hits.Length == 0) return;
 
         float bestSqr = float.PositiveInfinity;
-        Transform best = null;
+        ITargetable best = null;
 
         Vector3 origin = _basePivot.position;
         foreach (var h in hits)
         {
-            if (!h || h.transform == transform) continue;
+            if (!h) continue;
+
+            // ищем ITargetable на коллайдере/родителях
+            var t = h.GetComponentInParent<ITargetable>();
+            if (t == null || !t.IsAlive) continue;
+
+            // не берем саму турель
+            if (t.TargetTransform && t.TargetTransform == transform) continue;
 
             Vector3 to = h.bounds.center - origin;
-            to.y = 0f; 
-
+            to.y = 0f;
             float sqr = to.sqrMagnitude;
             if (sqr < bestSqr)
             {
                 bestSqr = sqr;
-                best = h.transform;
+                best = t;
             }
         }
 
-        _target = best;
+        SetTarget(best);
     }
 
     private void AimAtTarget(float dt)
     {
-        if (!_target) return;
+        if (_target == null) return;
+        var tr = _target.TargetTransform;
+        if (!tr) { SetTarget(null); return; }
 
         Vector3 origin = _basePivot.position;
-        Vector3 toTarget = _target.position - origin;
+        Vector3 toTarget = tr.position - origin;
 
         Vector3 toFlat = toTarget; toFlat.y = 0f;
         if (toFlat.sqrMagnitude > 0.0001f)
         {
             toFlat.Normalize();
-
             Vector3 baseInitialFwd = _baseInitialRotWorld * Vector3.forward;
             float desiredYaw = SignedAngleOnPlane(baseInitialFwd, toFlat, Vector3.up);
             float clampedYaw = Mathf.Clamp(desiredYaw, -_halfHor, _halfHor);
-
             Quaternion targetBaseRot = Quaternion.AngleAxis(clampedYaw, Vector3.up) * _baseInitialRotWorld;
 
-            _basePivot.rotation = Quaternion.RotateTowards(_basePivot.rotation, targetBaseRot, _config.HorizontalRotationSpeed * dt);
+            _basePivot.rotation = Quaternion.RotateTowards(_basePivot.rotation, targetBaseRot,
+                                                           _config.HorizontalRotationSpeed * dt);
         }
 
         Vector3 headPos = _headPivot.position;
-        Vector3 lookDir = (_target.position - headPos);
+        Vector3 lookDir = (tr.position - headPos);
         if (lookDir.sqrMagnitude > 0.0001f)
         {
             Quaternion desiredHeadWorld = Quaternion.LookRotation(lookDir.normalized, Vector3.up);
@@ -142,7 +194,7 @@ public class TurretBase : MonoBehaviour
     private void ReturnToRest(float dt)
     {
         _basePivot.rotation = Quaternion.RotateTowards(
-            _basePivot.rotation, _baseInitialRotWorld, _config.HorizontalRotationSpeed * _config.ReturnSpeedMul * dt);
+        _basePivot.rotation, _baseInitialRotWorld, _config.HorizontalRotationSpeed * _config.ReturnSpeedMul * dt);
 
         _headPivot.localRotation = Quaternion.RotateTowards(
             _headPivot.localRotation, _headInitialRotLocal, _config.VerticalRotationSpeed * _config.ReturnSpeedMul * dt);
@@ -158,61 +210,54 @@ public class TurretBase : MonoBehaviour
     {
         if (Time.time < _nextFireTime) return;
 
-        Vector3 origin = _headPivot.position;
-        Vector3 dir = _headPivot.forward;
-
-        if (_target)
+        if (_target != null)
         {
-            Vector3 toTarget = (_target.position - origin).normalized;
-            float aimErr = Vector3.Angle(dir, toTarget);
-            if (aimErr > _config.FireAngleTolerance)
-                return;
+            Vector3 originHead = _headPivot.position;
+            Vector3 toTarget = (_target.TargetTransform.position - originHead);
+            if (toTarget.sqrMagnitude > 0.0001f)
+            {
+                float aimErr = Vector3.Angle(_headPivot.forward, toTarget.normalized);
+                if (aimErr > _config.FireAngleTolerance) return;
+            }
         }
 
-        if (Physics.Raycast(origin, dir, out RaycastHit hit, _config.DetectionRadius, _config.TargetMask, QueryTriggerInteraction.Ignore))
+        bool fired = false;
+        foreach (var muzzle in _muzzlePos)
+        {
+            if (!muzzle) continue;
+
+            Vector3 origin = muzzle.position;
+            Vector3 dir = muzzle.forward;
+
+            if (Physics.Raycast(origin, dir, out RaycastHit hit, _config.DetectionRadius,
+                                _config.TargetMask, QueryTriggerInteraction.Ignore))
+            {
+                fired = true;
+
+                var dmg = hit.collider.GetComponentInParent<IDamageable>();
+                if (dmg != null) dmg.ApplyDamage(_config.Damage);
+
+                Debug.DrawLine(origin, hit.point, Color.red, 0.1f);
+            }
+        }
+
+        if (fired)
         {
             _nextFireTime = Time.time + 1f / Mathf.Max(0.0001f, _config.FireRate);
 
-
-            _audioService.Play(_config.ShotSound, parent: transform, position: transform.position, maxSoundDistance: _config.MaxDistanceSound);
+            _audioService.Play(_config.ShotSound, parent: transform, position: transform.position,
+                               maxSoundDistance: _config.MaxDistanceSound);
 
             foreach (var muzzle in _muzzlePos)
             {
+                if (!muzzle) continue;
                 _particleService.Play(_config.MuzzleParticle, muzzle, muzzle.position, muzzle.rotation);
             }
-
-            var dmg = hit.collider.GetComponentInParent<IDamageable>();
-            if (dmg != null)
-            {
-                dmg.ApplyDamage(_config.Damage);
-                Debug.Log($"[Turret] Hit {hit.collider.name} damage={_config.Damage:0.##} at {hit.point}");
-            }
-            else
-            {
-                Debug.Log($"[Turret] Ray hit {hit.collider.name} (no IDamageable) at {hit.point}");
-            }
-        }
-        else
-        {
-
         }
     }
-
-    private static float NormalizeAngle(float euler)
-    {
-        float a = Mathf.Repeat(euler + 180f, 360f) - 180f;
-        return a;
-    }
-
-    private static float DeltaAngle(float from, float to)
-    {
-        return Mathf.DeltaAngle(from, to);
-    }
-
-    private static float WrapAngle(float signed)
-    {
-        return (signed % 360f + 360f) % 360f;
-    }
+    private static float NormalizeAngle(float euler) => Mathf.Repeat(euler + 180f, 360f) - 180f;
+    private static float DeltaAngle(float from, float to) => Mathf.DeltaAngle(from, to);
+    private static float WrapAngle(float signed) => (signed % 360f + 360f) % 360f;
 
     private static float SignedAngleOnPlane(Vector3 vFrom, Vector3 vTo, Vector3 planeN)
     {
@@ -224,7 +269,7 @@ public class TurretBase : MonoBehaviour
         return unsigned * sign;
     }
 
-    private void OnDrawGizmosSelected()
+    private void OnDrawGizmos()
     {
         Gizmos.color = new Color(0f, 1f, 1f, 0.25f);
         Gizmos.DrawWireSphere(_basePivot ? _basePivot.position : transform.position, _config.DetectionRadius);
@@ -235,5 +280,10 @@ public class TurretBase : MonoBehaviour
             Gizmos.DrawLine(_headPivot.position, _headPivot.position + _headPivot.forward * _config.DetectionRadius);
         }
     }
-   
+
+    private void OnDisable()
+    {
+        SetTarget(null);
+    }
+
 }

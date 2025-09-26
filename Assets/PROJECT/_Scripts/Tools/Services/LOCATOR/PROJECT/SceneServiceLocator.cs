@@ -147,15 +147,10 @@ namespace Service
 
         public T BindFromScene<T>(bool includeInactive = true) where T : Component
         {
-            // 1) сначала пробуем под контейнером (как раньше)
+
             var comp = Container ? Container.GetComponentInChildren<T>(includeInactive) : null;
 
-#if UNITY_2023_1_OR_NEWER
-            // 2) если не нашли — ищем по всей сцене
             if (comp == null) comp = FindFirstObjectByType<T>(includeInactive ? FindObjectsInactive.Include : FindObjectsInactive.Exclude);
-#else
-    if (comp == null) comp = (T)UnityEngine.Object.FindObjectOfType(typeof(T), includeInactive);
-#endif
 
             if (comp == null)
                 throw new InvalidOperationException($"[Scene] {typeof(T).Name} not found anywhere in scene (searched under '{Container?.name ?? "<null>"}' and globally).");
@@ -174,7 +169,6 @@ namespace Service
             if (_map.TryGetValue(typeof(T), out var obj))
                 return (T)obj;
 
-            // падение в глобальный – удобнее, чем сразу исключение
             return ServiceLocator.Get<T>();
         }
 
@@ -257,9 +251,10 @@ namespace Service
         private bool TryBuildParameters(ConstructorInfo ctor, out object[] args)
         {
             var ps = ctor.GetParameters();
-            if (ps.Length == 0) { args = Array.Empty<object>(); return true; }
+            if (ps.Length == 0) { args = System.Array.Empty<object>(); return true; }
 
             var list = new object[ps.Length];
+
             for (int i = 0; i < ps.Length; i++)
             {
                 var pType = ps[i].ParameterType;
@@ -271,38 +266,29 @@ namespace Service
                     continue;
                 }
 
-                // 2) глобальный бинд?
-                if (ServiceLocator.TryGet(out object globalObj) && globalObj.GetType() == pType || ServiceLocator.TryGet(out globalObj) && pType.IsInstanceOfType(globalObj))
-                {
-                    // небольшой хак: TryGet<object> нельзя напрямую — сделаем generic через рефлексию
-                }
-
-                if (TryGetFromGlobal(pType, out var global))
+                // 2) глобальный бинд? (точный или совместимый)
+                if (ServiceLocator.TryGet(pType, out var global))
                 {
                     list[i] = global;
                     continue;
                 }
 
-                // 3) Component — ищем в сценовом контейнере, затем в глобальном контейнере, затем по сцене
+                // 3) Component — ищем: scene container → global container → вся сцена
                 if (typeof(Component).IsAssignableFrom(pType))
                 {
                     Component found = null;
 
-                    if (Container != null) found = (Component)Container.GetComponentInChildren(pType, true);
+                    if (Container != null)
+                        found = (Component)Container.GetComponentInChildren(pType, true);
 
                     if (found == null && ServiceLocator.Container != null)
                         found = (Component)ServiceLocator.Container.GetComponentInChildren(pType, true);
 
-#if UNITY_2023_1_OR_NEWER
                     if (found == null)
                         found = (Component)FindFirstObjectByType(pType, FindObjectsInactive.Include);
-#else
-                    if (found == null)
-                        found = (Component)UnityEngine.Object.FindObjectOfType(pType, true);
-#endif
+
                     if (found != null)
                     {
-                        // кэшируем в СЦЕНОВУЮ карту (это сценовый ресурс)
                         _map[pType] = found;
                         if (found is IInitializable initC) initC.Initialize();
                         list[i] = found;
@@ -314,17 +300,17 @@ namespace Service
                         $"Place it under scene Container '{Container?.name}' or bind it explicitly.");
                 }
 
-                // 4) Конкретный класс (не интерфейс/не абстракция/не MB) — создаём автоматически в сценовом скоупе
+                // 4) Конкретный класс (не интерфейс/абстракция/MB) — создаём в сценовом скоупе
                 if (!pType.IsInterface && !pType.IsAbstract && !typeof(Component).IsAssignableFrom(pType))
                 {
-                    var created = CreateWithInjection(pType);   // рекурсивно
+                    var created = CreateWithInjection(pType);
                     _map[pType] = created;
                     if (created is IInitializable initS) initS.Initialize();
                     list[i] = created;
                     continue;
                 }
 
-                // 5) Интерфейс/абстракция не найдены ни в сцене, ни в глобале
+                // 5) Не нашли интерфейс/абстракцию — ошибка
                 throw new InvalidOperationException(
                     $"[Scene] Unbound dependency '{pType.Name}' (interface/abstract) required by {ctor.DeclaringType!.Name}. " +
                     $"Bind it in SceneServiceLocator or ServiceLocator before binding {ctor.DeclaringType!.Name}.");
@@ -336,25 +322,12 @@ namespace Service
 
         private static bool TryGetFromGlobal(Type t, out object obj)
         {
-            // аккуратно вытаскиваем из глобального локатора объект данного типа, если он есть
-            if (ServiceLocator.TryGet(out obj))
-            {
-                // выше TryGet<object> не вызвать, поэтому берём из мапы через рефлексию
-            }
-
-            // прямого API у тебя нет — сделаем проход по внутренней карте через резолв по типу
-            try
-            {
-                var mi = typeof(ServiceLocator).GetMethod("Get", BindingFlags.Public | BindingFlags.Static);
-                var generic = mi.MakeGenericMethod(t);
-                obj = generic.Invoke(null, null);
-                return true;
-            }
-            catch
-            {
-                obj = null;
-                return false;
-            }
+            var mi = typeof(ServiceLocator).GetMethod(nameof(ServiceLocator.TryGet),System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            var g = mi.MakeGenericMethod(t);
+            var args = new object[] { null };
+            var ok = (bool)g.Invoke(null, args);
+            obj = ok ? args[0] : null;
+            return ok;
         }
 
         private static void SafeDispose(object obj)
