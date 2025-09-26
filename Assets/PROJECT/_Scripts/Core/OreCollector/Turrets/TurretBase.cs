@@ -8,11 +8,11 @@ public class TurretBase : MonoBehaviour
 
     [Header("Parts")]
     [Tooltip("Rotate around Y (base yaw)")]
-    [SerializeField] private Transform basePivot;   
+    [SerializeField] private Transform _basePivot;   
     [Tooltip("Rotate around X (head pitch) - local X rotates head up/down")]
-    [SerializeField] private Transform headPivot;  
+    [SerializeField] private Transform _headPivot;  
     [Tooltip("Where raycast starts and muzzle particle is placed")]
-    [SerializeField] private Transform muzzle;
+    [SerializeField] private Transform _muzzlePos;
 
     private Transform _target;
     private float _nextFireTime;
@@ -28,20 +28,22 @@ public class TurretBase : MonoBehaviour
 
 
     private IAudioService _audioService;
+    private IParticleService _particleService;
 
     private void Awake()
     {
-        if (!basePivot) basePivot = transform;
-        if (!headPivot) headPivot = basePivot;
-        if (!muzzle) muzzle = headPivot;
+        if (!_basePivot) _basePivot = transform;
+        if (!_headPivot) _headPivot = _basePivot;
+        if (!_muzzlePos) _muzzlePos = _headPivot;
 
-        _baseInitialRotWorld = basePivot.rotation;
-        _headInitialRotLocal = headPivot.localRotation;
+        _baseInitialRotWorld = _basePivot.rotation;
+        _headInitialRotLocal = _headPivot.localRotation;
 
         _halfHor = Mathf.Max(0f, _config.MaxHorizontalAngle * 0.5f);
         _halfVer = Mathf.Max(0f, _config.MaxVerticalAngle * 0.5f);
 
         _audioService = ServiceLocator.Get<IAudioService>();
+        _particleService = ServiceLocator.Get<IParticleService>();
     }
 
     private void Update()
@@ -67,13 +69,13 @@ public class TurretBase : MonoBehaviour
     {
         _target = null;
 
-        Collider[] hits = Physics.OverlapSphere(basePivot.position, _config.DetectionRadius, _config.TargetMask, QueryTriggerInteraction.Ignore);
+        Collider[] hits = Physics.OverlapSphere(_basePivot.position, _config.DetectionRadius, _config.TargetMask, QueryTriggerInteraction.Ignore);
         if (hits == null || hits.Length == 0) return;
 
         float bestSqr = float.PositiveInfinity;
         Transform best = null;
 
-        Vector3 origin = basePivot.position;
+        Vector3 origin = _basePivot.position;
         foreach (var h in hits)
         {
             if (!h || h.transform == transform) continue;
@@ -96,7 +98,7 @@ public class TurretBase : MonoBehaviour
     {
         if (!_target) return;
 
-        Vector3 origin = basePivot.position;
+        Vector3 origin = _basePivot.position;
         Vector3 toTarget = _target.position - origin;
 
         Vector3 toFlat = toTarget; toFlat.y = 0f;
@@ -110,15 +112,15 @@ public class TurretBase : MonoBehaviour
 
             Quaternion targetBaseRot = Quaternion.AngleAxis(clampedYaw, Vector3.up) * _baseInitialRotWorld;
 
-            basePivot.rotation = Quaternion.RotateTowards(basePivot.rotation, targetBaseRot, _config.HorizontalRotationSpeed * dt);
+            _basePivot.rotation = Quaternion.RotateTowards(_basePivot.rotation, targetBaseRot, _config.HorizontalRotationSpeed * dt);
         }
 
-        Vector3 headPos = headPivot.position;
+        Vector3 headPos = _headPivot.position;
         Vector3 lookDir = (_target.position - headPos);
         if (lookDir.sqrMagnitude > 0.0001f)
         {
             Quaternion desiredHeadWorld = Quaternion.LookRotation(lookDir.normalized, Vector3.up);
-            Transform parent = headPivot.parent ? headPivot.parent : basePivot.parent;
+            Transform parent = _headPivot.parent ? _headPivot.parent : _basePivot.parent;
             Quaternion parentWorld = parent ? parent.rotation : Quaternion.identity;
             Quaternion desiredLocal = Quaternion.Inverse(parentWorld) * desiredHeadWorld;
 
@@ -134,7 +136,7 @@ public class TurretBase : MonoBehaviour
             targetLocalEuler.x = WrapAngle(finalPitch);
 
             Quaternion targetLocalRot = Quaternion.Euler(targetLocalEuler);
-            headPivot.localRotation = Quaternion.RotateTowards(headPivot.localRotation, targetLocalRot, _config.VerticalRotationSpeed * dt);
+            _headPivot.localRotation = Quaternion.RotateTowards(_headPivot.localRotation, targetLocalRot, _config.VerticalRotationSpeed * dt);
         }
 
         _returning = false;
@@ -142,29 +144,26 @@ public class TurretBase : MonoBehaviour
 
     private void ReturnToRest(float dt)
     {
-        basePivot.rotation = Quaternion.RotateTowards(
-            basePivot.rotation, _baseInitialRotWorld, _config.HorizontalRotationSpeed * _config.ReturnSpeedMul * dt);
+        _basePivot.rotation = Quaternion.RotateTowards(
+            _basePivot.rotation, _baseInitialRotWorld, _config.HorizontalRotationSpeed * _config.ReturnSpeedMul * dt);
 
-        headPivot.localRotation = Quaternion.RotateTowards(
-            headPivot.localRotation, _headInitialRotLocal, _config.VerticalRotationSpeed * _config.ReturnSpeedMul * dt);
+        _headPivot.localRotation = Quaternion.RotateTowards(
+            _headPivot.localRotation, _headInitialRotLocal, _config.VerticalRotationSpeed * _config.ReturnSpeedMul * dt);
 
         if (_returning == false)
         {
             _returning = true;
             _audioService.Play(_config.NoTargetSound, parent: transform, position: transform.position, maxSoundDistance: _config.MaxDistanceSound);
         }
-
     }
-
-    // ----------- Firing -----------
 
     private void TryFireShot()
     {
         if (Time.time < _nextFireTime) return;
-        if (!muzzle) return;
+        if (!_muzzlePos) return;
 
-        Vector3 origin = muzzle.position;
-        Vector3 dir = muzzle.forward;
+        Vector3 origin = _muzzlePos.position;
+        Vector3 dir = _muzzlePos.forward;
 
         if (_target)
         {
@@ -180,8 +179,7 @@ public class TurretBase : MonoBehaviour
 
 
             _audioService.Play(_config.ShotSound, parent: transform, position: transform.position, maxSoundDistance: _config.MaxDistanceSound);
-            /*            if (_config.MuzzleParticle)
-                            _config.MuzzleParticle.Play(true);*/
+            _particleService.Play(_config.MuzzleParticle, _muzzlePos, _muzzlePos.position, _muzzlePos.rotation);
 
             var dmg = hit.collider.GetComponentInParent<IDamageable>();
             if (dmg != null)
@@ -229,12 +227,12 @@ public class TurretBase : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = new Color(0f, 1f, 1f, 0.25f);
-        Gizmos.DrawWireSphere(basePivot ? basePivot.position : transform.position, _config.DetectionRadius);
+        Gizmos.DrawWireSphere(_basePivot ? _basePivot.position : transform.position, _config.DetectionRadius);
 
-        if (muzzle)
+        if (_muzzlePos)
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawLine(muzzle.position, muzzle.position + muzzle.forward * _config.DetectionRadius);
+            Gizmos.DrawLine(_muzzlePos.position, _muzzlePos.position + _muzzlePos.forward * _config.DetectionRadius);
         }
     }
    

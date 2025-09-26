@@ -28,7 +28,7 @@ namespace Service
             ServiceLocator.BindFromChildren<TooltipeView>();
             ServiceLocator.BindWithInterface<ITooltipService, TooltipService>();
 
-            ServiceLocator.BindWithInterface<IParticlService, ParticlService>();
+            ServiceLocator.BindWithInterface<IParticleService, ParticleService>();
 
             ServiceLocator.BindFromChildren<PopupView>();
             ServiceLocator.BindWithInterface<IPopupService, PopupService>();

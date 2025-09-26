@@ -22,7 +22,7 @@ public class TurretConfig : ScriptableObject
 
 
     [Tooltip("Effects")]
-    [field: SerializeField] public ParticleSystem MuzzleParticle { get; private set; }
+    [field: SerializeField] public ParticleController MuzzleParticle { get; private set; }
 
     [Tooltip("Sound")]
     [field: SerializeField] public AudioConfig ShotSound { get; private set; }
