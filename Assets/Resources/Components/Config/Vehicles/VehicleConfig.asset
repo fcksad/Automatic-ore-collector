@@ -15,12 +15,6 @@ MonoBehaviour:
   <VehicleId>k__BackingField: 0
   <MoveSpeed>k__BackingField: 5
   <RotateSpeed>k__BackingField: 15
-  <DecalPrefab>k__BackingField: {fileID: -7703641393974697054, guid: 3edc011c696548540b15c8bbf38d4564, type: 3}
-  <DecalLifeTime>k__BackingField: 20
-  <DecalFadeTime>k__BackingField: 10
-  <DecalSpacing>k__BackingField: 1
-  <DecalRandomize>k__BackingField: 1
-  <DecalRandomRot>k__BackingField: 3
-  <DecalRandomOffset>k__BackingField: 0.01
+  TrackStamps: {fileID: 11400000, guid: a5b72c464e3c4f64291ba98fa1c7da90, type: 2}
   <CollectSpeed>k__BackingField: 5
   <ArmorValue>k__BackingField: 5

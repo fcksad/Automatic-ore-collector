@@ -1,4 +1,3 @@
-using Service;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,18 +9,14 @@ public class VehicleBase : MonoBehaviour, IControllable
     [SerializeField] private VehicleController _controller;
 
     [Header("Decals")]
-    [SerializeField] private Transform _decalParent;
+    [SerializeField] private TrackStampsInstanced _trackStampsInstanced;
     [SerializeField] private List<Transform> _decalPoints = new List<Transform>();
     private Vector3[] _lastDecalPos;
-
-    private float _moveInput;  
-    private float _turnInput;
-
-    private IInstantiateFactoryService _instantiateFactoryService;
+    private float _moveInput, _turnInput;
 
     private void Awake()
     {
-        _instantiateFactoryService = ServiceLocator.Get<IInstantiateFactoryService>();
+        _trackStampsInstanced.ApplyConfig(_vehicleConfig.TrackStamps);
 
         _lastDecalPos = new Vector3[_decalPoints.Count];
         for (int i = 0; i < _decalPoints.Count; i++)
@@ -36,9 +31,7 @@ public class VehicleBase : MonoBehaviour, IControllable
     private void FixedUpdate()
     {
         float dt = Time.fixedDeltaTime;
-
         _rb.linearVelocity = transform.forward * (_moveInput * _vehicleConfig.MoveSpeed);
-
         float deltaYaw = -_turnInput * _vehicleConfig.RotateSpeed * dt;
         _rb.MoveRotation(_rb.rotation * Quaternion.Euler(0f, deltaYaw, 0f));
 
@@ -48,24 +41,24 @@ public class VehicleBase : MonoBehaviour, IControllable
 
     private void TrySpawnDecals()
     {
-        float spacing = Mathf.Max(0.01f, _vehicleConfig.DecalSpacing);
+        var cfg = _vehicleConfig.TrackStamps;
+        if (cfg == null) return;
+
+        float spacing = Mathf.Max(0.01f, cfg.Spacing);
 
         for (int i = 0; i < _decalPoints.Count; i++)
         {
             var p = _decalPoints[i];
-            if (p == null) continue;
+            if (!p) continue;
 
             Vector3 prev = _lastDecalPos[i];
             Vector3 curr = p.position;
 
-            Vector3 delta = curr - prev;
-            delta.y = 0f;
-
+            Vector3 delta = curr - prev; delta.y = 0f;
             float dist = delta.magnitude;
-            if (dist < spacing || dist <= Mathf.Epsilon) continue;
+            if (dist <= Mathf.Epsilon || dist < spacing) continue;
 
             Vector3 dir = delta.normalized;
-
             float remaining = dist;
             Vector3 spawnPos = prev;
 
@@ -75,32 +68,25 @@ public class VehicleBase : MonoBehaviour, IControllable
             while (remaining >= spacing && safety++ < MAX_PER_POINT_PER_FRAME)
             {
                 spawnPos += dir * spacing;
-       
+
                 float yaw = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
+                if (cfg.Randomize) yaw += Random.Range(-cfg.RandomRot, cfg.RandomRot);
 
                 Vector3 pos = spawnPos;
-                if (_vehicleConfig.DecalRandomize)
-                    yaw += Random.Range(-_vehicleConfig.DecalRandomRot, _vehicleConfig.DecalRandomRot);
+                if (cfg.Randomize)
+                {
+                    var off = Random.insideUnitCircle * cfg.RandomOffset;
+                    pos += new Vector3(off.x, 0f, off.y);
+                }
 
-                Quaternion rot = Quaternion.Euler(90f, yaw, 0f);
-                SpawnDecal(pos, rot);
+                Quaternion rot = Quaternion.Euler(0f, yaw, 0f);
+                _trackStampsInstanced.Add(pos, rot);
+
                 remaining -= spacing;
             }
 
             _lastDecalPos[i] = curr - dir * remaining;
         }
-    }
-
-    private void SpawnDecal(Vector3 worldPos, Quaternion worldRot)
-    {
-        var decal = _instantiateFactoryService.Create(
-            _vehicleConfig.DecalPrefab,
-            position: worldPos,
-            rotation: worldRot,
-            parent: _decalParent
-        );
-
-        decal.Init(_vehicleConfig.DecalLifeTime, _vehicleConfig.DecalFadeTime, _instantiateFactoryService);
     }
 
     [ContextMenu("Set to controll")]
