@@ -15,7 +15,7 @@ public class AudioLoopAwakeTrigger : MonoBehaviour
 
     private void PlayLoop()
     {
-        _audioService.Play(_audioConfig, true);
+        _audioService.Play(_audioConfig);
     }
 
     private void OnDestroy()

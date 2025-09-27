@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: EnemyConfig
   m_EditorClassIdentifier: 
   <EnemyID>k__BackingField: 01
-  <Speed>k__BackingField: 3
+  <MoveSpeed>k__BackingField: 5
   <RotationSpeed>k__BackingField: 60
-  <Health>k__BackingField: 20000
+  <Health>k__BackingField: 25
   <Damage>k__BackingField: 1
-  <AttackSpead>k__BackingField: 10
+  <AttackSpeed>k__BackingField: 4
   <AttackRange>k__BackingField: 1
   <BumperLength>k__BackingField: 0.5
   <BumperHalfExtents>k__BackingField: {x: 0.35, y: 0.3, z: 0.04}

@@ -12,11 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 346a38e715474eb4ea0cf8ce58569643, type: 3}
   m_Name: Turret_no_target
   m_EditorClassIdentifier: 
-  <AudioName>k__BackingField: Turrell_no_target
+  <AudioName>k__BackingField: Turret_no_target
   <Type>k__BackingField: 2
-  <OneShoot>k__BackingField: 0
   <AudioClips>k__BackingField:
   - {fileID: 8300000, guid: 38bd7e9dc7f7b924c89fd32b22483e7c, type: 3}
-  SpatialBlend: 1
+  <OneShoot>k__BackingField: 1
+  <Loop>k__BackingField: 0
   MinPitch: 1
   MaxPitch: 1
+  <Spatial>k__BackingField: 1
+  SpatialBlend: 1
+  <MinDistance>k__BackingField: 1
+  <MaxDistance>k__BackingField: 30

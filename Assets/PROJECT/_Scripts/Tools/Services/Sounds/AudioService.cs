@@ -1,4 +1,3 @@
-using Service.Tweener;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,175 +8,200 @@ namespace Service
     public class AudioService : IAudioService, IInitializable
     {
         private readonly Dictionary<AudioType, float> _volumes = new();
-        private readonly Dictionary<(AudioType, string), List<AudioSource>> _namedSources = new();
-        private readonly Dictionary<AudioType, AudioSource> _oneShootSources = new();
+        private readonly Dictionary<(AudioType, string), List<AudioEmitter>> _active = new();
+        private readonly Dictionary<AudioType, AudioSource> _oneShot2D = new();
 
         private GameObject _audioRoot;
-        private ISaveService _saveService;
+        private AudioEmitter _audioEmitterPrefab;
 
-        public AudioService(ISaveService saveService)
+        private ISaveService _saveService;
+        private IInstantiateFactoryService _instantiateFactoryService;
+
+        public AudioService(ISaveService saveService, IInstantiateFactoryService instantiateFactoryService)
         {
             _saveService = saveService;
+            _instantiateFactoryService = instantiateFactoryService;
         }
 
         public void Initialize()
         {
+            _audioEmitterPrefab = ResourceLoader.Get<AudioEmitter>("Components/Audio/AudioEmitter");
+
             _audioRoot = new GameObject("[AudioService]");
             UnityEngine.Object.DontDestroyOnLoad(_audioRoot);
 
             foreach (AudioType type in Enum.GetValues(typeof(AudioType)))
             {
-                float volume = _saveService.SettingsData.AudioData.SoundVolumes.TryGetValue(type.ToString(), out float loadedVolume) ? loadedVolume : 0.5f;
-                _volumes[type] = volume;
+                float vol = _saveService.SettingsData.AudioData.SoundVolumes.TryGetValue(type.ToString(), out float loaded)
+                    ? loaded : 0.5f;
+                _volumes[type] = vol;
 
-                if (type != AudioType.SFX)
-                {
-                    var src = CreateAudioSource(type.ToString() + "OneShoot");
-                    src.volume = volume;
-                    _oneShootSources[type] = src;
-                }
+                var go = new GameObject($"{type}_OneShot2D");
+                go.transform.SetParent(_audioRoot.transform, false);
+
+                var src = go.AddComponent<AudioSource>();
+                src.playOnAwake = false;
+                src.spatialBlend = 0f;
+                src.loop = false;
+                src.volume = vol;
+
+                _oneShot2D[type] = src;
             }
         }
 
-        public AudioSource Play(AudioConfig audio, bool loop = false, int clipIndex = -1, Transform parent = null, Vector3? position = null, float fadeDuration = 0, float minSoundDistance = 1, float maxSoundDistance = 100)
+        public void Play(AudioConfig config,Transform parent = null, Vector3? position = null, int clipIndex = -1, float fadeIn = 0f, Action onFinished = null)
         {
-            if (audio.OneShoot == true)
+            if (config == null || config.AudioClips == null || config.AudioClips.Count == 0) return;
+
+            if (config.Spatial == SpatialMode.TwoD)
             {
-                var source = _oneShootSources[audio.Type];
-                source.pitch = UnityEngine.Random.Range(audio.MinPitch, audio.MaxPitch);
-                source.PlayOneShot(GetRandomClip(audio.AudioClips));
-                return source;
+                if (config.OneShoot) Play2DOneShot(config, clipIndex, onFinished);
+                else Play2DLoop(config, clipIndex, fadeIn, onFinished);
             }
-
-            var go = new GameObject($"{audio.Type}_{audio.AudioName}");
-            go.transform.SetParent(parent ? parent : _audioRoot.transform, worldPositionStays: false);
-            if (position.HasValue) go.transform.position = position.Value;
-
-            var src = go.AddComponent<AudioSource>();
-            SetupSource(src, audio, loop, clipIndex, minSoundDistance, maxSoundDistance);
-            src.Play();
-            if (fadeDuration > 0f)
+            else 
             {
-                float target = _volumes[audio.Type];
-                src.volume = 0f;
-                TW.To(() => src.volume, v => src.volume = v, target, fadeDuration)
-                  .SetEase(Ease.InOutQuad);
+                Play3D(config, parent, position, loop: config.Loop && !config.OneShoot, clipIndex: clipIndex, fadeIn: fadeIn, onFinished: onFinished);
             }
-
-            var key = (audio.Type, audio.AudioName);
-            if (!_namedSources.ContainsKey(key)) _namedSources[key] = new List<AudioSource>();
-            _namedSources[key].Add(src);
-
-            if (loop == false)
-            {
-
-                var playTime = src.clip.length + 0.5f;
-                TimerRemove(src, key, playTime);
-                UnityEngine.Object.Destroy(go, playTime);
-            }
-
-            return src;
         }
 
-        public void Stop(AudioConfig audio, float fade = 0)
+        public void Stop(AudioConfig config, float fadeOut = 0f)
         {
-            foreach (var target in _namedSources.Where(key => key.Key.Item1 == audio.Type && (string.IsNullOrEmpty(audio.AudioName) || key.Key.Item2 == audio.AudioName)).ToList())
+            if (config == null) return;
+            var key = (config.Type, config.AudioName ?? string.Empty);
+            if (!_active.TryGetValue(key, out var list)) return;
+
+            foreach (var emitter in list.ToArray())
             {
-                foreach (var source in target.Value)
-                {
-                    if (source == null) continue;
-
-                    if (fade > 0f)
-                    {
-                        TW.To(() => source.volume, v => source.volume = v, 0f, fade)
-                          .SetEase(Ease.InOutQuad)
-                          .OnComplete(() => { if (source) UnityEngine.Object.Destroy(source.gameObject); });
-                    }
-                    else
-                    {
-                        UnityEngine.Object.Destroy(source.gameObject);
-                    }
-                }
-
-                _namedSources.Remove(target.Key);
+                if (!emitter) { list.Remove(emitter); continue; }
+                emitter.Stop(fadeOut);
             }
+
+            if (list.Count == 0) _active.Remove(key);
         }
 
-        public void Pause(AudioConfig audio)
+        public void Pause(AudioConfig config)
         {
-            foreach (var source in _namedSources)
-            {
-                if (source.Key.Item1 == audio.Type && (audio.AudioName == null || source.Key.Item2 == audio.AudioName))
-                    source.Value.ForEach(s => s?.Pause());
+            if (config == null) return;
+            var key = (config.Type, config.AudioName ?? string.Empty);
+            if (!_active.TryGetValue(key, out var list)) return;
+            foreach (var emitter in list) if (emitter && emitter.Source) emitter.Source.Pause();
+        }
+
+        public void Resume(AudioConfig config)
+        {
+            if (config == null) return;
+            var key = (config.Type, config.AudioName ?? string.Empty);
+            if (!_active.TryGetValue(key, out var list)) return;
+            foreach (var emitter in list) if (emitter && emitter.Source) emitter.Source.UnPause();
+        }
+
+        public void Play2DOneShot(AudioConfig config, int clipIndex = -1, Action onFinished = null)
+        {
+            var src = _oneShot2D[config.Type];
+            if (!src) return;
+
+            var clip = SelectClip(config, clipIndex);
+            src.pitch = UnityEngine.Random.Range(config.MinPitch, config.MaxPitch);
+            src.PlayOneShot(clip, _volumes[config.Type]);
+
+            if(onFinished != null)
+    {
+                // длина с учётом pitch (+ небольшой запас)
+                var ms = (int)((clip.length / Mathf.Max(0.01f, src.pitch)) * 1000f) + 50;
+                FireAfter(ms, onFinished);
             }
         }
 
-        public void Resume(AudioConfig audio)
+        public void Play2DLoop(AudioConfig config, int clipIndex = -1, float fadeIn = 0f, Action onFinished = null)
         {
-            foreach (var source in _namedSources)
-            {
-                if (source.Key.Item1 == audio.Type && (audio.AudioName == null || source.Key.Item2 == audio.AudioName))
-                    source.Value.ForEach(s => s?.UnPause());
-            }
+            Play3D(config, parent: _audioRoot.transform, position: Vector3.zero,loop: true, clipIndex: clipIndex, fadeIn: fadeIn, force2D: true, onFinished: onFinished);
         }
+
+        public AudioEmitter Play3D( AudioConfig config, Transform parent = null, Vector3? position = null, bool loop = false, int clipIndex = -1, float fadeIn = 0f,  bool force2D = false, Action onFinished = null)
+        {
+            if (_audioEmitterPrefab == null) return null;
+
+            var key = (config.Type, config.AudioName ?? string.Empty);
+            var list = GetList(key);
+
+
+            var emitter = _instantiateFactoryService.Create(_audioEmitterPrefab, parent: parent ? parent : _audioRoot.transform,position: position ?? (parent ? parent.position : Vector3.zero), rotation: Quaternion.identity, customName: $"{config.Type}_{config.AudioName}"/*,key: $"{config.Type}:{config.AudioName}"*/);
+
+            if (!emitter || emitter.Source == null) return emitter;
+
+            var clip = SelectClip(config, clipIndex);
+            var vol = _volumes[config.Type];
+
+            emitter.Configure(clip: clip, volume: vol,pitch: UnityEngine.Random.Range(config.MinPitch, config.MaxPitch),spatialBlend: force2D ? 0f : Mathf.Clamp01(config.SpatialBlend),
+                minDist: config.MinDistance,maxDist: config.MaxDistance,loop: loop,mixer: null );
+
+            emitter.Play(fadeIn, e =>
+            {
+                try { onFinished?.Invoke(); } catch (Exception ex) { Debug.LogException(ex); }
+                OnEmitterFinished(e);
+            });
+
+            list.Add(emitter);
+            return emitter;
+        }
+
 
         public void SetVolume(AudioType type, float value)
         {
             _volumes[type] = value;
             _saveService.SettingsData.AudioData.SoundVolumes[type.ToString()] = value;
 
-            if (_oneShootSources.TryGetValue(type, out var oneShoot)) oneShoot.volume = value;
+            if (_oneShot2D.TryGetValue(type, out var bus) && bus) bus.volume = value;
 
-            foreach (var source in _namedSources)
+            foreach (var active in _active)
             {
-                if (source.Key.Item1 == type)
-                {
-                    source.Value.RemoveAll(named => named == null);
-                    foreach (var named in source.Value)
-                    {
-                        if (named != null) named.volume = value;
-                    }
-                }
+                if (active.Key.Item1 != type) continue;
+                active.Value.RemoveAll(e => e == null);
+                foreach (var e in active.Value) if (e && e.Source) e.Source.volume = value;
             }
         }
 
         public float GetVolume(AudioType type) => _volumes.TryGetValue(type, out float volume) ? volume : 0.5f;
 
-        private void SetupSource(AudioSource src, AudioConfig audio, bool loop, int clipIndex = -1, float minSoundDistance = 1, float maxSoundDistance = 100)
+        private void OnEmitterFinished(AudioEmitter emitter)
         {
-            src.loop = loop;
-            src.playOnAwake = false;
-            src.spatialBlend = audio.SpatialBlend;
-            src.pitch = UnityEngine.Random.Range(audio.MinPitch, audio.MaxPitch);
-            src.minDistance = minSoundDistance;
-            src.maxDistance = maxSoundDistance;
-            src.clip = clipIndex >= 0 ? audio.AudioClips[clipIndex] : GetRandomClip(audio.AudioClips);
-            src.volume = _volumes[audio.Type];
-        }
+            if (!emitter) return;
 
-        private async void TimerRemove(AudioSource src, (AudioType, string) key, float delay)
-        {
-            await System.Threading.Tasks.Task.Delay(TimeSpan.FromSeconds(delay));
-            if (_namedSources.TryGetValue(key, out var list))
+            foreach (var value in _active.ToArray())
             {
-                list.Remove(src);
-                if (list.Count == 0) _namedSources.Remove(key);
+                var list = value.Value;
+                if (list.Remove(emitter) && list.Count == 0) _active.Remove(value.Key);
             }
+
+            _instantiateFactoryService.Release(emitter);
         }
 
-        private AudioSource CreateAudioSource(string name, Transform parent = null, Vector3? pos = null)
+        private AudioClip SelectClip(AudioConfig config, int clipIndex)
         {
-            var obj = new GameObject(name);
-            obj.transform.SetParent(parent != null ? parent : _audioRoot.transform);
-            obj.transform.position = pos ?? Vector3.zero;
-
-            var source = obj.AddComponent<AudioSource>();
-            source.playOnAwake = false;
-            return source;
+            if (config.AudioClips == null || config.AudioClips.Count == 0) return null;
+            if (clipIndex >= 0 && clipIndex < config.AudioClips.Count) return config.AudioClips[clipIndex];
+            return config.AudioClips[UnityEngine.Random.Range(0, config.AudioClips.Count)];
         }
 
-        private AudioClip GetRandomClip(List<AudioClip> clips) => clips[UnityEngine.Random.Range(0, clips.Count)];
+        private List<AudioEmitter> GetList((AudioType, string) key)
+        {
+            if (!_active.TryGetValue(key, out var list))
+            {
+                list = new List<AudioEmitter>(4);
+                _active[key] = list;
+            }
+            return list;
+        }
 
+        private async void FireAfter(int milliseconds, Action cb)
+        {
+            try
+            {
+                await System.Threading.Tasks.Task.Delay(milliseconds);
+                cb?.Invoke();
+            }
+            catch (Exception ex) { Debug.LogException(ex); }
+        }
     }
 }
 

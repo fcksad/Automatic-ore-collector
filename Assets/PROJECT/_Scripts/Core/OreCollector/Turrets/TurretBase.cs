@@ -189,7 +189,7 @@ public class TurretBase : MonoStateMachine<TurretBase>
         if (_returning == false)
         {
             _returning = true;
-            AudioService.Play(Config.NoTargetSound, parent: transform, position: transform.position, maxSoundDistance: Config.MaxDistanceSound);
+            AudioService.Play(Config.NoTargetSound, parent: transform, position: transform.position);
         }
     }
 
@@ -231,7 +231,7 @@ public class TurretBase : MonoStateMachine<TurretBase>
         {
             NextFireTime = Time.time + 1f / Mathf.Max(0.0001f, Config.FireRate);
 
-            AudioService.Play(Config.ShotSound, parent: transform, position: transform.position, maxSoundDistance: Config.MaxDistanceSound);
+            AudioService.Play(Config.ShotSound, parent: transform, position: transform.position);
 
             foreach (var muzzle in _muzzlePos)
             {

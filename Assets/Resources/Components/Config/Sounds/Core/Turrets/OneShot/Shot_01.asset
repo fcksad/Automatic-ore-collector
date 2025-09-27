@@ -14,10 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <AudioName>k__BackingField: Shot_01
   <Type>k__BackingField: 2
-  <OneShoot>k__BackingField: 0
   <AudioClips>k__BackingField:
   - {fileID: 8300000, guid: cfd734768ca4bce469887e6ce69cad2b, type: 3}
   - {fileID: 8300000, guid: 582c349d50d63b84996170574ff30ee8, type: 3}
-  SpatialBlend: 1
+  <OneShoot>k__BackingField: 1
+  <Loop>k__BackingField: 0
   MinPitch: 0.9
   MaxPitch: 1.1
+  <Spatial>k__BackingField: 1
+  SpatialBlend: 1
+  <MinDistance>k__BackingField: 1
+  <MaxDistance>k__BackingField: 30

@@ -1,49 +1,33 @@
 using Service;
-using System.Threading.Tasks;
 using UnityEngine;
 
 
 public class AudioMusicPlayer : MonoBehaviour
 {
     [SerializeField] private AudioConfig _musicConfig;
-    private bool _isPlaying = true;
+
+    private MusicPlaylist _musicPlaylist;
     private IAudioService _audioService;
 
     public void Start()
     {
         _audioService = ServiceLocator.Get<IAudioService>();
-        _ = PlayLoop();
+
+        _musicPlaylist = new MusicPlaylist(ServiceLocator.Get<IAudioService>(), _musicConfig, shuffle: true);
+        _musicPlaylist.Crossfade = 0.8f;
+        _musicPlaylist.Play();
+
+        /*        // управление:
+                _musicPlaylist.Next();
+                _musicPlaylist.Pause();
+                _musicPlaylist.Resume();
+                _musicPlaylist.SetShuffle(false);
+                _musicPlaylist.SetVolume(0.7f);
+                _musicPlaylist.Stop();*/
     }
-
-    private async Task PlayLoop()
-    {
-        while (_isPlaying)
-        {
-            var source = _audioService.Play(_musicConfig, loop: false, fadeDuration: 1);
-
-            if (source == null || source.clip == null)
-                break;
-
-            float duration = source.clip.length;
-            float timer = 0f;
-
-            while (_isPlaying && timer < duration)
-            {
-                await Task.Delay(200);
-                timer += 0.2f;
-            }
-
-            await Task.Delay(200);
-        }
-    }
-
 
     private void OnDestroy()
     {
-        _isPlaying = false;
-        if (_audioService != null && _musicConfig != null)
-        {
-            _audioService.Stop(_musicConfig, fadeDuration: 0.5f);
-        }
+        _musicPlaylist?.Stop();
     }
 }

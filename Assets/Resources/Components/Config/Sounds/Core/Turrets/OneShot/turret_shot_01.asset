@@ -14,7 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <AudioName>k__BackingField: turret_shot_01
   <Type>k__BackingField: 2
-  <OneShoot>k__BackingField: 0
   <AudioClips>k__BackingField:
   - {fileID: 8300000, guid: 56b33a9005577c0489b3bce54c67a7f5, type: 3}
   - {fileID: 8300000, guid: f60524e96f824674fa93a7dd838cd361, type: 3}
@@ -22,6 +21,11 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 4afd6fa78e9786445b2880d48567336c, type: 3}
   - {fileID: 8300000, guid: 9d7f5afcc31d2c74ca2ffa2a009a300d, type: 3}
   - {fileID: 8300000, guid: f9d77a46679360c4caadd3720629f5cf, type: 3}
-  SpatialBlend: 1
+  <OneShoot>k__BackingField: 1
+  <Loop>k__BackingField: 0
   MinPitch: 0.85
   MaxPitch: 0.95
+  <Spatial>k__BackingField: 1
+  SpatialBlend: 1
+  <MinDistance>k__BackingField: 1
+  <MaxDistance>k__BackingField: 30

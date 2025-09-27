@@ -14,8 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <AudioName>k__BackingField: A Glitched Fracture
   <Type>k__BackingField: 1
-  <OneShoot>k__BackingField: 0
-  <SpatialBlend>k__BackingField: 0
   <AudioClips>k__BackingField: []
+  <OneShoot>k__BackingField: 1
+  <Loop>k__BackingField: 1
   MinPitch: 1
   MaxPitch: 1
+  <Spatial>k__BackingField: 0
+  SpatialBlend: 0
+  <MinDistance>k__BackingField: 1
+  <MaxDistance>k__BackingField: 50

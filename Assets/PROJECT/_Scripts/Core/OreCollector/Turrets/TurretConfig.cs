@@ -29,8 +29,6 @@ public class TurretConfig : ScriptableObject
     [field: SerializeField] public AudioConfig ShotSound { get; private set; }
     [field: SerializeField] public AudioConfig NoTargetSound { get; private set; }
 
-    [Range(1, 100)] public float MaxDistanceSound = 30f;
-
     [Header("Behavior")]
     [Tooltip("Time between target reacquire scans")]
     [field: SerializeField] public float ScanInterval { get; private set; } = 0.15f;

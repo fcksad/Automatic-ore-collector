@@ -11,7 +11,7 @@ public class TurretTrack : State<TurretBase>
     {
         base.OnEnter();
         _reacquireAt = 0f;
-        Owner.AudioService.Play(Owner.Config.NoTargetSound, parent: Owner.transform, position: Owner.transform.position, maxSoundDistance: Owner.Config.MaxDistanceSound);
+        Owner.AudioService.Play(Owner.Config.NoTargetSound, parent: Owner.transform, position: Owner.transform.position);
     }
 
     public override void Tick()
