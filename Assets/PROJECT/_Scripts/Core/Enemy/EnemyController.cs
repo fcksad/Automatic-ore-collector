@@ -69,11 +69,11 @@ public class EnemyController : MonoBehaviour
     }
 
     public EnemyBase SpawnAt(Transform spawnPoint)
-        => SpawnAt(spawnPoint.position, spawnPoint.rotation);
+        => SpawnAt(spawnPoint.position);
 
-    public EnemyBase SpawnAt(Vector3 pos, Quaternion rot)
+    public EnemyBase SpawnAt(Vector3 pos)
     {
-        var enemy = _factory.Create(enemyPrefab, position: pos, rotation: rot, parent: transform);
+        var enemy = _factory.Create(enemyPrefab, position: pos, parent: transform);
         enemy.gameObject.SetActive(true);
 
         enemy.Initialize(this, _audio, _particles);
@@ -88,6 +88,17 @@ public class EnemyController : MonoBehaviour
     {
         if (!enemy) return;
 
+        int idx = _alive.IndexOf(enemy);
+
+        if (idx >= 0)
+        {
+            if (idx <= _tickCursor && _tickCursor > 0) _tickCursor--;
+            _alive.RemoveAt(idx);
+
+            if (_tickCursor >= _alive.Count) _tickCursor = 0;
+        }
+
+        enemy.OnDespawn();
         _factory.Release(enemy);
     }
 
