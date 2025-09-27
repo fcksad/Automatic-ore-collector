@@ -21,7 +21,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   <DetectionRadius>k__BackingField: 25
-  <FireRate>k__BackingField: 12
+  <FireRate>k__BackingField: 5
   <Damage>k__BackingField: 1
   <FireAngleTolerance>k__BackingField: 2
   <ReacquireIfOutOfAngles>k__BackingField: 0
@@ -29,7 +29,6 @@ MonoBehaviour:
   <MuzzleParticle>k__BackingField: {fileID: 4356469530381987533, guid: e5a0c337e8f45a34fadac26068500d99, type: 3}
   <ShotSound>k__BackingField: {fileID: 11400000, guid: a8e7e6c294325c64fad012d0dfab3bc5, type: 2}
   <NoTargetSound>k__BackingField: {fileID: 11400000, guid: 6bf8983f7d1609c4bb88bfb1eb6eb12f, type: 2}
-  MaxDistanceSound: 2
   <ScanInterval>k__BackingField: 0.15
   <ReturnToRest>k__BackingField: 0
   <ReturnSpeedMul>k__BackingField: 0.5

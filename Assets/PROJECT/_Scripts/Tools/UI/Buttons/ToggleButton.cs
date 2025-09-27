@@ -14,7 +14,7 @@ public class ToggleButton : CustomButton
     {
         foreach (var window in _windows)
         {
-            window.Toggle();
+            window?.Toggle();
         }
     }
 

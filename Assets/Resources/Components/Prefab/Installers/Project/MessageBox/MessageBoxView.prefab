@@ -607,6 +607,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2280238842796139316}
     m_Modifications:
+    - target: {fileID: -7062676081042542952, guid: 708be1315ba5a994f9c2e3195f3dfcb9, type: 3}
+      propertyPath: _soundConfig
+      value: 
+      objectReference: {fileID: 11400000, guid: bad6946856a4c3242a508303deea1476, type: 2}
     - target: {fileID: 247402574759307576, guid: 708be1315ba5a994f9c2e3195f3dfcb9, type: 3}
       propertyPath: m_Name
       value: BUTTON - No
@@ -782,6 +786,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2280238842796139316}
     m_Modifications:
+    - target: {fileID: -7062676081042542952, guid: 708be1315ba5a994f9c2e3195f3dfcb9, type: 3}
+      propertyPath: _soundConfig
+      value: 
+      objectReference: {fileID: 11400000, guid: bad6946856a4c3242a508303deea1476, type: 2}
     - target: {fileID: 247402574759307576, guid: 708be1315ba5a994f9c2e3195f3dfcb9, type: 3}
       propertyPath: m_Name
       value: BUTTON - Yes
@@ -957,6 +965,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2280238842796139316}
     m_Modifications:
+    - target: {fileID: -7062676081042542952, guid: 708be1315ba5a994f9c2e3195f3dfcb9, type: 3}
+      propertyPath: _soundConfig
+      value: 
+      objectReference: {fileID: 11400000, guid: bad6946856a4c3242a508303deea1476, type: 2}
     - target: {fileID: 247402574759307576, guid: 708be1315ba5a994f9c2e3195f3dfcb9, type: 3}
       propertyPath: m_Name
       value: BUTTON - OK

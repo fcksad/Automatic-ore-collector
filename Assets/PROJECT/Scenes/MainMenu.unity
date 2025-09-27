@@ -1129,7 +1129,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _button: {fileID: 4152649260454278805}
-  _soundConfig: {fileID: 11400000, guid: 2e3cc9ca4d84a0a47b5498313f82acf8, type: 2}
+  _soundConfig: {fileID: 11400000, guid: bad6946856a4c3242a508303deea1476, type: 2}
 --- !u!114 &2160695956877700472
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1143,7 +1143,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _button: {fileID: 4152649260180248597}
-  _soundConfig: {fileID: 11400000, guid: 2e3cc9ca4d84a0a47b5498313f82acf8, type: 2}
+  _soundConfig: {fileID: 11400000, guid: bad6946856a4c3242a508303deea1476, type: 2}
 --- !u!114 &2160695957198740003
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1157,7 +1157,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _button: {fileID: 4152649259829718862}
-  _soundConfig: {fileID: 11400000, guid: 2e3cc9ca4d84a0a47b5498313f82acf8, type: 2}
+  _soundConfig: {fileID: 11400000, guid: bad6946856a4c3242a508303deea1476, type: 2}
 --- !u!114 &2379301994186575568
 MonoBehaviour:
   m_ObjectHideFlags: 0

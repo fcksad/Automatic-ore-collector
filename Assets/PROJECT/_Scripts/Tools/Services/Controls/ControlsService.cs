@@ -1,4 +1,5 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,11 +8,12 @@ namespace Service
     /// <summary>
     /// USe on input version 1.11.2
     /// </summary>
-    public class ControlsService : IControlsService, IInitializable
+    public class ControlsService : IControlsService, IInitializable 
     {
         private PlayerInput _playerInput;
         private ISaveService _saveService;
 
+        private InputActionRebindingExtensions.RebindingOperation _rebinding;
         public event Action OnBindingRebindEvent;
 
         public ControlsService(ISaveService saveService, PlayerInput playerInput)
@@ -32,26 +34,77 @@ namespace Service
 #endif
         }
 
-        public void Binding(string actionName, int bindingIndex, Action onComplete = null)
+        public Action Binding(InputAction action, int bindingIndex, Action onComplete = null)
         {
-            var action = _playerInput.actions.FindAction(actionName);
             if (action == null)
             {
-                Debug.LogError($"Action {actionName} not found!");
-                return;
+                Debug.LogError("BeginRebind: action is null");
+                return null;
             }
+
+            CancelActiveRebind();
 
             action.Disable();
 
-            action.PerformInteractiveRebinding(bindingIndex)
-                .OnComplete(operation =>
+            _rebinding = action.PerformInteractiveRebinding(bindingIndex).OnComplete(rebinding => 
+            {
+                try
                 {
                     action.Enable();
                     SaveBinding(action, bindingIndex);
                     OnBindingRebindEvent?.Invoke();
                     onComplete?.Invoke();
-                })
-                .Start();
+                }
+                finally
+               {
+                    rebinding.Dispose();
+                    if (_rebinding == rebinding) _rebinding = null;
+                }
+            })
+            .OnCancel(rebinding =>
+            {
+            try
+            {
+                action.Enable();
+            }
+            finally
+            {
+                rebinding.Dispose();
+                if (_rebinding == rebinding) _rebinding = null;
+            }
+        });
+
+            _rebinding.Start();
+
+             return () =>
+            {
+                if (_rebinding != null)
+                {
+                    try { _rebinding.Cancel(); } catch { /* ignore */ }
+
+                }
+            };
+
+            /*            action.Disable();
+
+                        action.PerformInteractiveRebinding(bindingIndex)
+                            .OnComplete(operation =>
+                            {
+                                action.Enable();
+                                SaveBinding(action, bindingIndex);
+                                OnBindingRebindEvent?.Invoke();
+                                onComplete?.Invoke();
+                            })
+                            .Start();*/
+        }
+
+        public void CancelActiveRebind()
+        {
+            if (_rebinding != null)
+            {
+                try { _rebinding.Cancel(); } catch {  }
+
+            }
         }
 
         public void SaveBinding(InputAction action, int bindingIndex)
@@ -65,6 +118,8 @@ namespace Service
         public void Rebinding(InputAction action, Guid bindingId)
         {
             int bindingIndex = -1;
+            CancelActiveRebind();
+
             for (int i = 0; i < action.bindings.Count; i++)
             {
                 if (action.bindings[i].id == bindingId)

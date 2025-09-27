@@ -17,6 +17,8 @@ namespace Service
             ServiceLocator.BindWithInterface<IInstantiateFactoryService, InstantiateFactoryService>();
             ServiceLocator.BindWithInterface<IAudioService, AudioService>();
 
+            ServiceLocator.BindWithInterface<IGraphicsService, GraphicsService>();
+
             ServiceLocator.BindFromChildren<PlayerInput>();
             ServiceLocator.BindWithInterface<IInputService, InputService>();
 

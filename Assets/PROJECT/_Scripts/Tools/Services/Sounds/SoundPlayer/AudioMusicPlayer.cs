@@ -9,7 +9,7 @@ public class AudioMusicPlayer : MonoBehaviour
     private MusicPlaylist _musicPlaylist;
     private IAudioService _audioService;
 
-    public void Start()
+   /* public void Start()
     {
         _audioService = ServiceLocator.Get<IAudioService>();
 
@@ -17,17 +17,17 @@ public class AudioMusicPlayer : MonoBehaviour
         _musicPlaylist.Crossfade = 0.8f;
         _musicPlaylist.Play();
 
-        /*        // управление:
+        *//*        // управление:
                 _musicPlaylist.Next();
                 _musicPlaylist.Pause();
                 _musicPlaylist.Resume();
                 _musicPlaylist.SetShuffle(false);
                 _musicPlaylist.SetVolume(0.7f);
-                _musicPlaylist.Stop();*/
+                _musicPlaylist.Stop();*//*
     }
 
     private void OnDestroy()
     {
         _musicPlaylist?.Stop();
-    }
+    }*/
 }

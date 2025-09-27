@@ -50,6 +50,7 @@ public class ControlsController : MonoBehaviour
     [SerializeField] private LocalizationConfig _localizedBindKey;
 
     private BindingReference _activeRebindRef;
+    private Action _cancelRebind;
     private ITweener _rebindTimeoutTween;
 
     private float _rebindCountdownRemaining;
@@ -155,12 +156,9 @@ public class ControlsController : MonoBehaviour
                       _countdownTween?.Kill();
                       _countdownTween = TW.Every(1f, 20, CountdownTick);
 
-                      _controlsService.Binding(bindingRef.Action.name, bindingRef.BindingIndex, () =>
+                      _cancelRebind = _controlsService.Binding(bindingRef.Action, bindingRef.BindingIndex, () =>
                       {
-                          _rebindTimeoutTween?.Kill();
-                          _countdownTween?.Kill();
-                          _waitingForInputScreen.SetActive(false);
-                          _waitingForInputScreenText.text = "";
+                          CleanupRebindUI();
                           UpdateBindingUI(bindingRef);
                           CheckConflicts();
                       });
@@ -171,15 +169,27 @@ public class ControlsController : MonoBehaviour
 
     private void CancelRebind()
     {
-        _waitingForInputScreen.SetActive(false);
-        _rebindTimeoutTween?.Kill();
-        _countdownTween?.Kill();
-        _waitingForInputScreenText.text = "";
+        _cancelRebind?.Invoke();
+        _cancelRebind = null;
+
+        CleanupRebindUI();
 
         if (_activeRebindRef != null)
             _activeRebindRef.Control.KeyAction.text = _activeRebindRef.Action.name;
 
         _activeRebindRef = null;
+    }
+
+    private void CleanupRebindUI()
+    {
+        _rebindTimeoutTween?.Kill();
+        _rebindTimeoutTween = null;
+
+        _countdownTween?.Kill();
+        _countdownTween = null;
+
+        _waitingForInputScreen.SetActive(false);
+        _waitingForInputScreenText.text = "";
     }
 
     private void ResetBinding(BindingReference bindingRef)
