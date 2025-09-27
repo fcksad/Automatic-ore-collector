@@ -1,12 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VehicleBase : MonoBehaviour, IControllable
+public class VehicleBase : MonoBehaviour, IControllable , IDamageable
 {
+    [field: SerializeField] public Collider MainCollider {  get; private set; }
+
     [Header("Configurations")]
     [SerializeField] private VehicleConfig _vehicleConfig;
     [SerializeField] private Rigidbody _rb;
     [SerializeField] private VehicleController _controller;
+
 
     [Header("Decals")]
     [SerializeField] private TrackStampsInstanced _trackStampsInstanced;
@@ -37,7 +40,6 @@ public class VehicleBase : MonoBehaviour, IControllable
 
         TrySpawnDecals();
     }
-
 
     private void TrySpawnDecals()
     {
@@ -92,5 +94,8 @@ public class VehicleBase : MonoBehaviour, IControllable
     [ContextMenu("Set to controll")]
     public void SetToControl() => _controller.SetVehicle(this);
 
-
+    public void ApplyDamage(float damage)
+    {
+        Debug.Log("Taked" +  damage);
+    }
 }

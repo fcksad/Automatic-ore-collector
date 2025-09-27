@@ -12,9 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 423646e61aba7d34ea117e836fc999ef, type: 3}
   m_Name: EnemyConfig
   m_EditorClassIdentifier: 
-  <EnemyID>k__BackingField: 0
-  <Speed>k__BackingField: 5
-  <RotationSpeed>k__BackingField: 1
-  <Health>k__BackingField: 10
+  <EnemyID>k__BackingField: 01
+  <Speed>k__BackingField: 2
+  <RotationSpeed>k__BackingField: 60
+  <Health>k__BackingField: 30
   <Damage>k__BackingField: 1
-  <AttackSpead>k__BackingField: 4
+  <AttackSpead>k__BackingField: 10
+  <AttackRange>k__BackingField: 1
+  <BumperLength>k__BackingField: 0.5
+  <BumperHalfExtents>k__BackingField: {x: 0.35, y: 0.3, z: 0.04}
+  <ObstacleMask>k__BackingField:
+    serializedVersion: 2
+    m_Bits: 833
+  <SkirtSideWeight>k__BackingField: 0.9
+  <SkirtFwdWeight>k__BackingField: 0.6
+  <SkirtTurnSpeed>k__BackingField: 180
+  <SkirtProbeLen>k__BackingField: 0.7
+  <SkirtMaxTime>k__BackingField: 5

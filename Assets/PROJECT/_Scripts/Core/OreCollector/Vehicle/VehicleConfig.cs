@@ -3,7 +3,6 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "VehicleConfig", menuName = "Configs/Vehicle/VehicleConfig")]
 public class VehicleConfig : ScriptableObject
 {
-
     [field: SerializeField] public string VehicleId { get; private set; }
 
     [Header("Physics")]

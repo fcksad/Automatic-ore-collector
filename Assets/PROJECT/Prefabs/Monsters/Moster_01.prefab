@@ -121,4 +121,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 764027306e9bfcc43bda093704ec9443, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _config: {fileID: 11400000, guid: 9cd9671d92a7f4d4f9c2aac246397412, type: 2}
+  <Config>k__BackingField: {fileID: 11400000, guid: 9cd9671d92a7f4d4f9c2aac246397412, type: 2}
+  <Target>k__BackingField: {fileID: 0}
+  Health: 0
+  _selfCol: {fileID: 9091527706738168814}
+  _alliesMask:
+    serializedVersion: 2
+    m_Bits: 256
+  _obstaclePolicy: 0

@@ -1,16 +1,6 @@
-using UnityEngine;
-
-public class IEnemyState : MonoBehaviour
+public interface IEnemyState
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    void Enter();
+    void Exit();
+    void Tick();
 }

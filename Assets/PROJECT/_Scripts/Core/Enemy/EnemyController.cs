@@ -98,7 +98,7 @@ public class EnemyController : MonoBehaviour
             if (_tickCursor >= _alive.Count) _tickCursor = 0;
         }
 
-        enemy.OnDespawn();
+        //enemy.OnDespawn();
         _factory.Release(enemy);
     }
 

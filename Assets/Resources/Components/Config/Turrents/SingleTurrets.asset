@@ -24,10 +24,12 @@ MonoBehaviour:
   <FireRate>k__BackingField: 8
   <Damage>k__BackingField: 1
   <FireAngleTolerance>k__BackingField: 2
+  <ReacquireIfOutOfAngles>k__BackingField: 1
+  <ReacquireDelay>k__BackingField: 0.25
   <MuzzleParticle>k__BackingField: {fileID: 4356469530381987533, guid: e5a0c337e8f45a34fadac26068500d99, type: 3}
   <ShotSound>k__BackingField: {fileID: 11400000, guid: 90ad2d4241082f44887794a6a4b519d6, type: 2}
   <NoTargetSound>k__BackingField: {fileID: 11400000, guid: 6bf8983f7d1609c4bb88bfb1eb6eb12f, type: 2}
-  MaxDistanceSound: 30
+  MaxDistanceSound: 2
   <ScanInterval>k__BackingField: 0.15
-  <ReturnToRest>k__BackingField: 1
+  <ReturnToRest>k__BackingField: 0
   <ReturnSpeedMul>k__BackingField: 0.5
