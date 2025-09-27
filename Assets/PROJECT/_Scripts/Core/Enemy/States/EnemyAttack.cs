@@ -33,7 +33,7 @@ public class EnemyAttack : State<EnemyBase>
 
         if (Time.time >= _nextTime)
         {
-            _nextTime = Time.time + 1f / Mathf.Max(0.001f, Owner.Config.AttackSpead);
+            _nextTime = Time.time + 1f / Mathf.Max(0.001f, Owner.Config.AttackSpeed);
 
             var dmg = t.GetComponent<IDamageable>();
             if (dmg != null) dmg.ApplyDamage(Owner.Config.Damage);

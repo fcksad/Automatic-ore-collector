@@ -15,16 +15,16 @@ MonoBehaviour:
   <TurretId>k__BackingField: 0
   <HorizontalRotationSpeed>k__BackingField: 25
   <VerticalRotationSpeed>k__BackingField: 25
-  <MaxVerticalAngle>k__BackingField: 70
-  <MaxHorizontalAngle>k__BackingField: 360
+  <MaxVerticalAngle>k__BackingField: 60
+  <MaxHorizontalAngle>k__BackingField: 180
   <TargetMask>k__BackingField:
     serializedVersion: 2
     m_Bits: 256
-  <DetectionRadius>k__BackingField: 28
-  <FireRate>k__BackingField: 100
+  <DetectionRadius>k__BackingField: 25
+  <FireRate>k__BackingField: 12
   <Damage>k__BackingField: 1
   <FireAngleTolerance>k__BackingField: 2
-  <ReacquireIfOutOfAngles>k__BackingField: 1
+  <ReacquireIfOutOfAngles>k__BackingField: 0
   <ReacquireDelay>k__BackingField: 0.25
   <MuzzleParticle>k__BackingField: {fileID: 4356469530381987533, guid: e5a0c337e8f45a34fadac26068500d99, type: 3}
   <ShotSound>k__BackingField: {fileID: 11400000, guid: a8e7e6c294325c64fad012d0dfab3bc5, type: 2}

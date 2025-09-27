@@ -34,7 +34,7 @@ public class EnemyBase : MonoStateMachine<EnemyBase>, IDamageable, ITargetable
 
 
     public float AttackRange => Config.AttackRange + 0.1f;
-    public float MoveSpeed => Config.Speed;
+    public float MoveSpeed => Config.MoveSpeed;
     public float RotSpeedDeg => Config.RotationSpeed * Time.deltaTime;
 
     protected override void Awake()

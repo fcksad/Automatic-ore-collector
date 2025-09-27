@@ -13,16 +13,16 @@ MonoBehaviour:
   m_Name: SingleTurrets
   m_EditorClassIdentifier: 
   <TurretId>k__BackingField: 0
-  <HorizontalRotationSpeed>k__BackingField: 40
-  <VerticalRotationSpeed>k__BackingField: 40
-  <MaxVerticalAngle>k__BackingField: 70
-  <MaxHorizontalAngle>k__BackingField: 360
+  <HorizontalRotationSpeed>k__BackingField: 25
+  <VerticalRotationSpeed>k__BackingField: 25
+  <MaxVerticalAngle>k__BackingField: 60
+  <MaxHorizontalAngle>k__BackingField: 180
   <TargetMask>k__BackingField:
     serializedVersion: 2
     m_Bits: 256
   <DetectionRadius>k__BackingField: 30
-  <FireRate>k__BackingField: 8
-  <Damage>k__BackingField: 1
+  <FireRate>k__BackingField: 6
+  <Damage>k__BackingField: 2
   <FireAngleTolerance>k__BackingField: 2
   <ReacquireIfOutOfAngles>k__BackingField: 1
   <ReacquireDelay>k__BackingField: 0.25

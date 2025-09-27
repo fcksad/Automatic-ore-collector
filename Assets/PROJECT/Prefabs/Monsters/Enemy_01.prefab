@@ -13,8 +13,10 @@ GameObject:
   - component: {fileID: 7163207341317151500}
   - component: {fileID: 9091527706738168814}
   - component: {fileID: 6655674721590811152}
+  - component: {fileID: 2076907308607430211}
+  - component: {fileID: 6690492131589184831}
   m_Layer: 8
-  m_Name: Moster_01
+  m_Name: Enemy_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -129,3 +131,31 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   _obstaclePolicy: 0
+--- !u!114 &2076907308607430211
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 766264331139571961}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 593e8de35bfc9fd4ea0e779e64330917, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rigRoot: {fileID: 4937679947690708395}
+  applyScale: 1
+--- !u!114 &6690492131589184831
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 766264331139571961}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1e61e6ffb7d0d54597982559756368c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <EnemyVisualConfig>k__BackingField: {fileID: 11400000, guid: 2888928a18d919948b57634a73ba0b34, type: 2}
+  <Animmator>k__BackingField: {fileID: 2076907308607430211}

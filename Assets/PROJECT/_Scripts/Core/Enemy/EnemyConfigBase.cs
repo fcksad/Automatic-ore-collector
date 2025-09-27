@@ -8,11 +8,11 @@ public class EnemyConfigBase : ScriptableObject
     [field: SerializeField] public string EnemyID { get; private set; }
 
     [Tooltip("")]
-    [field: SerializeField] public float Speed { get; private set; } = 5;
+    [field: SerializeField] public float MoveSpeed { get; private set; } = 5;
     [field: SerializeField] public float RotationSpeed { get; private set; } = 60;
     [field: SerializeField] public float Health { get; private set; } = 10;
     [field: SerializeField] public float Damage { get; private set; } = 1;
-    [field: SerializeField] public float AttackSpead { get; private set; } = 4;
+    [field: SerializeField] public float AttackSpeed { get; private set; } = 4;
     [field: SerializeField] public float AttackRange { get; private set; } = 2;
 
     [Header("Navigation / Bumper")]
@@ -21,9 +21,9 @@ public class EnemyConfigBase : ScriptableObject
     [field: SerializeField] public LayerMask ObstacleMask { get; private set; } = ~0;
 
     [Header("Skirt (obstacle avoidance)")]
-    [field: SerializeField] public float SkirtSideWeight { get; private set; } = 0.9f;  // насколько сильно уводим вбок
-    [field: SerializeField] public float SkirtFwdWeight { get; private set; } = 0.6f;  // вперёд + вбок
-    [field: SerializeField] public float SkirtTurnSpeed { get; private set; } = 180f;  // град/с при обходе
-    [field: SerializeField] public float SkirtProbeLen { get; private set; } = 0.7f;  // длина короткого «пробного» луча
-    [field: SerializeField] public float SkirtMaxTime { get; private set; } = 2.0f;  // максимум времени «упирания» до смены стратегии
+    [field: SerializeField] public float SkirtSideWeight { get; private set; } = 0.9f;  
+    [field: SerializeField] public float SkirtFwdWeight { get; private set; } = 0.6f; 
+    [field: SerializeField] public float SkirtTurnSpeed { get; private set; } = 180f;
+    [field: SerializeField] public float SkirtProbeLen { get; private set; } = 0.7f; 
+    [field: SerializeField] public float SkirtMaxTime { get; private set; } = 2.0f; 
 }

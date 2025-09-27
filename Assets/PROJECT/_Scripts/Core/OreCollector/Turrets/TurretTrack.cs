@@ -5,9 +5,12 @@ public class TurretTrack : State<TurretBase>
 {
     public TurretTrack(TurretBase o) : base(o) { }
 
+    private float _reacquireAt;
+
     public override void OnEnter()
     {
         base.OnEnter();
+        _reacquireAt = 0f;
         Owner.AudioService.Play(Owner.Config.NoTargetSound, parent: Owner.transform, position: Owner.transform.position, maxSoundDistance: Owner.Config.MaxDistanceSound);
     }
 
@@ -15,27 +18,37 @@ public class TurretTrack : State<TurretBase>
     {
         float dt = Time.deltaTime;
 
-        if (Owner.Target == null)
+        if (!Owner.IsTargetInRadiusAlive(Owner.Target))
         {
-            Owner.FSM.Set(new TurretIdle(Owner));
-            return;
-        }
-
-        if (!Owner.IsWithinAimAngles(Owner.Target.TargetTransform))
-        {
-            var newT = Owner.FindBestTargetInRadius(preferShootable: true, requireLoSForPrefer: false);
-            if (newT != null && newT != Owner.Target)
-            {
-                Owner.SetTarget(newT);
-                return;
-            }
-
             Owner.SetTarget(null);
             Owner.FSM.Set(new TurretIdle(Owner));
             return;
         }
 
+        bool anglesOk = Owner.IsWithinAimAngles(Owner.Target.TargetTransform);
+
+        if (!anglesOk && Owner.Config.ReacquireIfOutOfAngles)
+        {
+            if (_reacquireAt == 0f)
+                _reacquireAt = Time.time + Owner.Config.ReacquireDelay;
+
+            if (Time.time >= _reacquireAt)
+            {
+                var newT = Owner.FindBestTargetInRadius(preferShootable: true, requireLoSForPrefer: true);
+                if (newT != null && newT != Owner.Target)
+                    Owner.SetTarget(newT);
+
+                _reacquireAt = 0f;
+            }
+        }
+        else
+        {
+            _reacquireAt = 0f;
+        }
+
         Owner.AimAtTarget(dt);
-        Owner.TryFireShot();
+
+        if (anglesOk)
+            Owner.TryFireShot();
     }
 }

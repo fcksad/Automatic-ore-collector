@@ -140,8 +140,7 @@ public class TurretBase : MonoStateMachine<TurretBase>
             float clampedYaw = Mathf.Clamp(desiredYaw, -_halfHor, _halfHor);
             Quaternion targetBaseRot = Quaternion.AngleAxis(clampedYaw, Vector3.up) * _baseInitialRotWorld;
 
-            _basePivot.rotation = Quaternion.RotateTowards(_basePivot.rotation, targetBaseRot,
-                                                           Config.HorizontalRotationSpeed * dt);
+            _basePivot.rotation = Quaternion.RotateTowards(_basePivot.rotation, targetBaseRot, Config.HorizontalRotationSpeed * dt);
         }
 
         Vector3 headPos = _headPivot.position;
@@ -260,7 +259,6 @@ public class TurretBase : MonoStateMachine<TurretBase>
     {
         if (tr == null) return false;
 
-        // горизонталь: угол относительно базового forward в плоскости Y
         Vector3 origin = _basePivot.position;
         Vector3 to = tr.position - origin;
         Vector3 toFlat = to; toFlat.y = 0f;
@@ -271,7 +269,6 @@ public class TurretBase : MonoStateMachine<TurretBase>
         float desiredYaw = SignedAngleOnPlane(baseInitialFwd, toFlat, Vector3.up);
         if (Mathf.Abs(desiredYaw) > _halfHor + 1e-3f) return false;
 
-        // вертикаль: рассчитаем желаемый pitch как в AimAtTarget, но не применяем
         Vector3 headPos = _headPivot.position;
         Vector3 lookDir = tr.position - headPos;
         if (lookDir.sqrMagnitude <= 1e-6f) return true;
@@ -285,7 +282,6 @@ public class TurretBase : MonoStateMachine<TurretBase>
         float desiredPitch = NormalizeAngle(desiredLocal.eulerAngles.x);
         float deltaFromInit = DeltaAngle(initPitch, desiredPitch);
 
-        // если превышает вертикальный допуск -> не влезает
         if (Mathf.Abs(deltaFromInit) > _halfVer + 1e-3f) return false;
 
         return true;
@@ -296,7 +292,6 @@ public class TurretBase : MonoStateMachine<TurretBase>
         if (tr == null) return false;
         if (_muzzlePos == null || _muzzlePos.Count == 0)
         {
-            // fallback: проверим из головы
             Vector3 origin = _headPivot.position;
             Vector3 dir = (tr.position - origin);
             if (dir.sqrMagnitude < 1e-6f) return true;
@@ -323,7 +318,6 @@ public class TurretBase : MonoStateMachine<TurretBase>
             }
             else
             {
-                // не попал никуда — считается свободным
                 return true;
             }
         }
@@ -331,7 +325,6 @@ public class TurretBase : MonoStateMachine<TurretBase>
         return false;
     }
 
-    // Проверка «стреляемости» - комбинирует углы и (опционально) LOS
     public bool CanShootTarget(ITargetable t, bool requireLoS = false)
     {
         if (t == null || !t.IsAlive) return false;
@@ -343,8 +336,6 @@ public class TurretBase : MonoStateMachine<TurretBase>
         return true;
     }
 
-    // Ищет среди коллайдеров в радиусе возможную цель, при этом отдаёт приоритет целям, которые можно зацепить (CanShootTarget).
-    // Возвращает первую подходящую (стреляемую) или ближайшую если allowClosestFallback==true.
     public ITargetable FindBestTargetInRadius(bool preferShootable = true, bool requireLoSForPrefer = false)
     {
         var hits = Physics.OverlapSphere(_basePivot.position, Config.DetectionRadius, Config.TargetMask, QueryTriggerInteraction.Ignore);
@@ -386,7 +377,6 @@ public class TurretBase : MonoStateMachine<TurretBase>
 
         if (bestShootable != null) return bestShootable;
 
-        // fallback - ближайшая
         if (bestClosestTr != null)
         {
             return bestClosestTr.GetComponentInParent<ITargetable>();
