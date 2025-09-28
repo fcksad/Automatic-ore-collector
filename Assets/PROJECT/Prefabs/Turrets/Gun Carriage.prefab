@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 9188522905174739572}
   - component: {fileID: 3559008327029312957}
   - component: {fileID: 6043936238924060510}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Gun Carriage
   m_TagString: Untagged
   m_Icon: {fileID: 0}

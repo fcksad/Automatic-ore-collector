@@ -14,6 +14,7 @@ public class PlaySceneBootstrap : MonoBehaviour
 
         _scene.BindFromScene<EnemyController>();
         _scene.BindFromScene<VehicleController>();
+        _scene.BindFromScene<CameraController>();
 
     }
 

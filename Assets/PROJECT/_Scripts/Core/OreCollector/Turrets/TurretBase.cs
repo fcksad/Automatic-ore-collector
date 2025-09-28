@@ -24,8 +24,7 @@ public class TurretBase : MonoStateMachine<TurretBase>
 
     private Quaternion _baseInitialRotWorld;
     private Quaternion _headInitialRotLocal;
-    private float _halfHor;   
-    private float _halfVer;
+    private float _halfHor, _halfVer;
 
     public IAudioService AudioService { get; private set; }
     public IParticleService ParticleService { get; private set; }
@@ -39,12 +38,11 @@ public class TurretBase : MonoStateMachine<TurretBase>
 
         base.Awake();
 
-        _baseInitialRotWorld = _basePivot.rotation;
+        _baseInitialRotWorld = _basePivot.localRotation;
         _headInitialRotLocal = _headPivot.localRotation;
 
         _halfHor = Mathf.Max(0f, Config.MaxHorizontalAngle * 0.5f);
         _halfVer = Mathf.Max(0f, Config.MaxVerticalAngle * 0.5f);
-
     }
 
     protected override void BuildStates()
@@ -84,8 +82,7 @@ public class TurretBase : MonoStateMachine<TurretBase>
         var tr = t.TargetTransform;
         if (!tr || !tr.gameObject.activeInHierarchy) return false;
 
-        if ((tr.position - _basePivot.position).sqrMagnitude > Config.DetectionRadius * Config.DetectionRadius)
-            return false;
+        if (!IsInDetectBand(tr.position)) return false;
 
         Vector3 origin = _headPivot.position;
         Vector3 dir = (tr.position - origin);
@@ -119,7 +116,7 @@ public class TurretBase : MonoStateMachine<TurretBase>
         var tr = t.TargetTransform;
         if (!tr || !tr.gameObject.activeInHierarchy) return false;
 
-        return (tr.position - _basePivot.position).sqrMagnitude <= Config.DetectionRadius * Config.DetectionRadius;
+        return IsInDetectBand(tr.position);
     }
 
     public void AimAtTarget(float dt)
@@ -128,44 +125,32 @@ public class TurretBase : MonoStateMachine<TurretBase>
         var tr = Target.TargetTransform;
         if (!tr) { SetTarget(null); return; }
 
-        Vector3 origin = _basePivot.position;
-        Vector3 toTarget = tr.position - origin;
-
-        Vector3 toFlat = toTarget; toFlat.y = 0f;
-        if (toFlat.sqrMagnitude > 0.0001f)
-        {
-            toFlat.Normalize();
-            Vector3 baseInitialFwd = _baseInitialRotWorld * Vector3.forward;
-            float desiredYaw = SignedAngleOnPlane(baseInitialFwd, toFlat, Vector3.up);
-            float clampedYaw = Mathf.Clamp(desiredYaw, -_halfHor, _halfHor);
-            Quaternion targetBaseRot = Quaternion.AngleAxis(clampedYaw, Vector3.up) * _baseInitialRotWorld;
-
-            _basePivot.rotation = Quaternion.RotateTowards(_basePivot.rotation, targetBaseRot, Config.HorizontalRotationSpeed * dt);
-        }
-
         Vector3 headPos = _headPivot.position;
-        Vector3 lookDir = (tr.position - headPos);
-        if (lookDir.sqrMagnitude > 0.0001f)
-        {
-            Quaternion desiredHeadWorld = Quaternion.LookRotation(lookDir.normalized, Vector3.up);
-            Transform parent = _headPivot.parent ? _headPivot.parent : _basePivot.parent;
-            Quaternion parentWorld = parent ? parent.rotation : Quaternion.identity;
-            Quaternion desiredLocal = Quaternion.Inverse(parentWorld) * desiredHeadWorld;
+        Vector3 lookDirWorld = tr.position - headPos;
+        if (lookDirWorld.sqrMagnitude <= 1e-6f) return;
 
-            Vector3 initLocalEuler = _headInitialRotLocal.eulerAngles;
-            float initPitch = NormalizeAngle(initLocalEuler.x);
-            float desiredPitch = NormalizeAngle(desiredLocal.eulerAngles.x);
+        Transform parent = _headPivot.parent;
+        Quaternion parentWorld = parent ? parent.rotation : Quaternion.identity;
 
-            float deltaFromInit = DeltaAngle(initPitch, desiredPitch);
-            float clampedDelta = Mathf.Clamp(deltaFromInit, -_halfVer, _halfVer);
-            float finalPitch = initPitch + clampedDelta;
+        Quaternion desiredHeadWorld = Quaternion.LookRotation(lookDirWorld.normalized, Vector3.up);
+        Quaternion desiredLocal = Quaternion.Inverse(parentWorld) * desiredHeadWorld;
 
-            Vector3 targetLocalEuler = desiredLocal.eulerAngles;
-            targetLocalEuler.x = WrapAngle(finalPitch);
+        Quaternion delta = Quaternion.Inverse(_headInitialRotLocal) * desiredLocal;
+        Vector3 deltaEuler = delta.eulerAngles;
 
-            Quaternion targetLocalRot = Quaternion.Euler(targetLocalEuler);
-            _headPivot.localRotation = Quaternion.RotateTowards(_headPivot.localRotation, targetLocalRot, Config.VerticalRotationSpeed * dt);
-        }
+        float yaw = NormalizeAngle(deltaEuler.y); 
+        float pitch = NormalizeAngle(deltaEuler.x);
+
+        yaw = Mathf.Clamp(yaw, -_halfHor, _halfHor);
+        pitch = Mathf.Clamp(pitch, -_halfVer, _halfVer);
+
+        Quaternion targetLocal = _headInitialRotLocal * Quaternion.Euler(pitch, yaw, 0f);
+
+        _headPivot.localRotation = Quaternion.RotateTowards(
+            _headPivot.localRotation,
+            targetLocal,
+            Config.VerticalRotationSpeed * dt 
+        );
 
         _returning = false;
     }
@@ -180,11 +165,7 @@ public class TurretBase : MonoStateMachine<TurretBase>
 
     public void ReturnToRest(float dt)
     {
-        _basePivot.rotation = Quaternion.RotateTowards(
-        _basePivot.rotation, _baseInitialRotWorld, Config.HorizontalRotationSpeed * Config.ReturnSpeedMul * dt);
-
-        _headPivot.localRotation = Quaternion.RotateTowards(
-            _headPivot.localRotation, _headInitialRotLocal, Config.VerticalRotationSpeed * Config.ReturnSpeedMul * dt);
+        _headPivot.localRotation = Quaternion.RotateTowards(_headPivot.localRotation, _headInitialRotLocal,Config.VerticalRotationSpeed * Config.ReturnSpeedMul * dt);
 
         if (_returning == false)
         {
@@ -197,47 +178,59 @@ public class TurretBase : MonoStateMachine<TurretBase>
     {
         if (Time.time < NextFireTime) return;
 
-        if (Target != null)
+        bool fired = false;
+
+        if (Config.FireOnUnaimedTargets && (Config.FireWithoutLockedTarget || Target != null))
+        {
+            if (TryPreFireRay(out var hit))
+            {
+                var dmg = hit.collider.GetComponent<IDamageable>();
+                if (dmg != null)
+                {
+                    dmg.ApplyDamage(Config.Damage);
+                    fired = true;
+                    Debug.DrawLine(hit.point - hit.normal * 0.2f, hit.point, Color.yellow, 0.1f);
+
+                    var t = hit.collider.GetComponent<ITargetable>();
+                    if (t != null && t != Target) SetTarget(t);
+                }
+            }
+        }
+
+        if (!fired && Target != null)
         {
             Vector3 originHead = _headPivot.position;
             Vector3 toTarget = (Target.TargetTransform.position - originHead);
             if (toTarget.sqrMagnitude > 0.0001f)
             {
                 float aimErr = Vector3.Angle(_headPivot.forward, toTarget.normalized);
-                if (aimErr > Config.FireAngleTolerance) return;
-            }
-        }
+                if (aimErr <= Config.FireAngleTolerance)
+                {
+                    foreach (var muzzle in _muzzlePos)
+                    {
+                        if (!muzzle) continue;
+                        Vector3 origin = muzzle.position;
+                        Vector3 dir = muzzle.forward;
 
-        bool fired = false;
-        foreach (var muzzle in _muzzlePos)
-        {
-            if (!muzzle) continue;
-
-            Vector3 origin = muzzle.position;
-            Vector3 dir = muzzle.forward;
-
-            if (Physics.Raycast(origin, dir, out RaycastHit hit, Config.DetectionRadius,Config.TargetMask, QueryTriggerInteraction.Ignore))
-            {
-                fired = true;
-
-                var dmg = hit.collider.GetComponentInParent<IDamageable>();
-                if (dmg != null) dmg.ApplyDamage(Config.Damage);
-
-                Debug.DrawLine(origin, hit.point, Color.red, 0.1f);
+                        if (Physics.Raycast(origin, dir, out RaycastHit hit, Config.DetectionRadius, Config.TargetMask, QueryTriggerInteraction.Collide))
+                        {
+                            var dmg = hit.collider.GetComponent<IDamageable>();
+                            if (dmg != null) dmg.ApplyDamage(Config.Damage);
+                            fired = true;
+                            Debug.DrawLine(origin, hit.point, Color.red, 0.1f);
+                        }
+                    }
+                }
             }
         }
 
         if (fired)
         {
             NextFireTime = Time.time + 1f / Mathf.Max(0.0001f, Config.FireRate);
-
             AudioService.Play(Config.ShotSound, parent: transform, position: transform.position);
-
-            foreach (var muzzle in _muzzlePos)
-            {
-                if (!muzzle) continue;
-                ParticleService.Play(Config.MuzzleParticle, muzzle, muzzle.position, muzzle.rotation);
-            }
+            if (_muzzlePos != null)
+                foreach (var muzzle in _muzzlePos)
+                    if (muzzle) ParticleService.Play(Config.MuzzleParticle, muzzle, muzzle.position, muzzle.rotation);
         }
     }
 
@@ -259,30 +252,24 @@ public class TurretBase : MonoStateMachine<TurretBase>
     {
         if (tr == null) return false;
 
-        Vector3 origin = _basePivot.position;
-        Vector3 to = tr.position - origin;
-        Vector3 toFlat = to; toFlat.y = 0f;
-        if (toFlat.sqrMagnitude <= 1e-6f) return true;
-        toFlat.Normalize();
-
-        Vector3 baseInitialFwd = _baseInitialRotWorld * Vector3.forward;
-        float desiredYaw = SignedAngleOnPlane(baseInitialFwd, toFlat, Vector3.up);
-        if (Mathf.Abs(desiredYaw) > _halfHor + 1e-3f) return false;
-
-        Vector3 headPos = _headPivot.position;
-        Vector3 lookDir = tr.position - headPos;
-        if (lookDir.sqrMagnitude <= 1e-6f) return true;
-
-        Quaternion desiredHeadWorld = Quaternion.LookRotation(lookDir.normalized, Vector3.up);
         Transform parent = _headPivot.parent ? _headPivot.parent : _basePivot.parent;
         Quaternion parentWorld = parent ? parent.rotation : Quaternion.identity;
+
+        Vector3 headPos = _headPivot.position;
+        Vector3 lookDirWorld = tr.position - headPos;
+        if (lookDirWorld.sqrMagnitude <= 1e-6f) return true;
+
+        Quaternion desiredHeadWorld = Quaternion.LookRotation(lookDirWorld.normalized, Vector3.up);
         Quaternion desiredLocal = Quaternion.Inverse(parentWorld) * desiredHeadWorld;
 
-        float initPitch = NormalizeAngle(_headInitialRotLocal.eulerAngles.x);
-        float desiredPitch = NormalizeAngle(desiredLocal.eulerAngles.x);
-        float deltaFromInit = DeltaAngle(initPitch, desiredPitch);
+        Quaternion delta = Quaternion.Inverse(_headInitialRotLocal) * desiredLocal;
+        Vector3 deltaEuler = delta.eulerAngles;
 
-        if (Mathf.Abs(deltaFromInit) > _halfVer + 1e-3f) return false;
+        float yaw = NormalizeAngle(deltaEuler.y);
+        float pitch = NormalizeAngle(deltaEuler.x);
+
+        if (Mathf.Abs(yaw) > _halfHor + 1e-3f) return false;
+        if (Mathf.Abs(pitch) > _halfVer + 1e-3f) return false;
 
         return true;
     }
@@ -338,22 +325,27 @@ public class TurretBase : MonoStateMachine<TurretBase>
 
     public ITargetable FindBestTargetInRadius(bool preferShootable = true, bool requireLoSForPrefer = false)
     {
-        var hits = Physics.OverlapSphere(_basePivot.position, Config.DetectionRadius, Config.TargetMask, QueryTriggerInteraction.Ignore);
+        var hits = Physics.OverlapSphere(_basePivot.position,Config.DetectionRadius, Config.TargetMask, QueryTriggerInteraction.Ignore);
+    
         if (hits == null || hits.Length == 0) return null;
-
+   
         ITargetable bestShootable = null;
         float bestShootableSqr = float.PositiveInfinity;
-
         Transform bestClosestTr = null;
         float bestClosestSqr = float.PositiveInfinity;
-
         Vector3 origin = _basePivot.position;
+
         foreach (var h in hits)
         {
             if (!h) continue;
-            var t = h.GetComponentInParent<ITargetable>();
+
+            var t = h.GetComponent<ITargetable>();
             if (t == null || !t.IsAlive) continue;
-            if (t.TargetTransform && t.TargetTransform == transform) continue;
+
+            var tr = t.TargetTransform;
+            if (!tr) continue;
+            if (!IsInDetectBand(tr.position)) continue;
+            if (tr == transform) continue;
 
             Vector3 to = h.bounds.center - origin;
             to.y = 0f;
@@ -376,24 +368,65 @@ public class TurretBase : MonoStateMachine<TurretBase>
         }
 
         if (bestShootable != null) return bestShootable;
-
-        if (bestClosestTr != null)
-        {
-            return bestClosestTr.GetComponentInParent<ITargetable>();
-        }
-
+        if (bestClosestTr != null) return bestClosestTr.GetComponent<ITargetable>();
         return null;
+    }
+
+    private bool TryPreFireRay(out RaycastHit hit)
+    {
+        hit = default;
+        if (!Config.FireOnUnaimedTargets || _muzzlePos == null || _muzzlePos.Count == 0) return false;
+
+        for (int i = 0; i < _muzzlePos.Count; i++)
+        {
+            var muzzle = _muzzlePos[i];
+            if (!muzzle) continue;
+
+            Vector3 origin = muzzle.position;
+            Vector3 dir = muzzle.forward;
+
+            bool hitSmth;
+            if (Config.PreFireRay > 0f)
+                hitSmth = Physics.SphereCast(origin, Config.PreFireRay, dir, out hit, Config.DetectionRadius, Config.TargetMask, QueryTriggerInteraction.Collide);
+            else
+                hitSmth = Physics.Raycast(origin, dir, out hit, Config.DetectionRadius, Config.TargetMask, QueryTriggerInteraction.Collide); 
+
+            if (!hitSmth) continue;
+
+            return true;
+        }
+        return false;
+    }
+
+    private bool IsInDetectBand(Vector3 pos)
+    {
+        float sqr = (pos - _basePivot.position).sqrMagnitude;
+        float minSqr = Config.MinDetectionRadius * Config.MinDetectionRadius;
+        float maxSqr = Config.DetectionRadius * Config.DetectionRadius;
+        return sqr >= minSqr && sqr <= maxSqr;
     }
 
     protected void OnDrawGizmos()
     {
         Gizmos.color = new Color(0f, 1f, 1f, 0.25f);
-        Gizmos.DrawWireSphere(_basePivot ? _basePivot.position : transform.position, Config.DetectionRadius);
+        var pivotPos = _basePivot ? _basePivot.position : transform.position;
+        Gizmos.DrawWireSphere(pivotPos, Config.DetectionRadius);
 
-        if (_headPivot)
+        if (Config.MinDetectionRadius > 0f)
         {
-            Gizmos.color = Color.red;
-            Gizmos.DrawLine(_headPivot.position, _headPivot.position + _headPivot.forward * Config.DetectionRadius);
+            Gizmos.color = new Color(1f, 0.3f, 0.3f, 0.25f);
+            Gizmos.DrawWireSphere(pivotPos, Config.MinDetectionRadius); 
+        }
+
+        if (_muzzlePos == null) return;
+        Gizmos.color = Color.yellow;
+        float maxDist = (Config.DetectionRadius > 0f) ? Config.DetectionRadius : (Config ? Config.DetectionRadius : 10f);
+        foreach (var m in _muzzlePos)
+        {
+            if (!m) continue;
+            if (Config.PreFireRay > 0f)
+                Gizmos.DrawWireSphere(m.position + m.forward * Mathf.Min(0.2f, maxDist), Config.PreFireRay);
+            Gizmos.DrawLine(m.position, m.position + m.forward * maxDist);
         }
     }
 
@@ -401,5 +434,4 @@ public class TurretBase : MonoStateMachine<TurretBase>
     {
         SetTarget(null);
     }
-
 }

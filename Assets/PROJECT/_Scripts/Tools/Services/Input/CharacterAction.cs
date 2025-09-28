@@ -7,6 +7,7 @@ public enum CharacterAction
 
     Move = 10,
     Rotate = 11,
+    Scroll = 12,
 
 
 }

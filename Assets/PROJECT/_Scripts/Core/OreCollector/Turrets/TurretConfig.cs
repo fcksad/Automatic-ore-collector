@@ -10,10 +10,11 @@ public class TurretConfig : ScriptableObject
     [field: SerializeField] public float VerticalRotationSpeed { get; private set; } = 40f;
 
     [field: SerializeField] public float MaxVerticalAngle { get; private set; } = 20f;
-    [field: SerializeField] public float MaxHorizontalAngle { get; private set; } = 360f;
+    [field: SerializeField] public float MaxHorizontalAngle { get; private set; } = 180f;
 
     [Header("Detection/Fire")]
     [field: SerializeField] public LayerMask TargetMask { get; private set; }
+    [field: SerializeField, Min(0f)] public float MinDetectionRadius { get; private set; } = 4;
     [field: SerializeField] public float DetectionRadius { get; private set; } = 12f;
     [field: SerializeField] public float FireRate { get; private set; } = 4f;
     [field: SerializeField] public float Damage { get; private set; } = 15f;
@@ -21,6 +22,11 @@ public class TurretConfig : ScriptableObject
     [field: SerializeField] public float FireAngleTolerance { get; private set; } = 6f;
     [field: SerializeField] public bool ReacquireIfOutOfAngles { get; private set; } = true;
     [field: SerializeField, Min(0f)] public float ReacquireDelay { get; private set; } = 0.25f;
+
+    [Tooltip("Allow shooting only when muzzle is within this angle to target (deg)")]
+    [field: SerializeField] public float PreFireRay = 0.08f;
+    [field: SerializeField] public bool FireOnUnaimedTargets { get; private set; } = true;
+    [field: SerializeField] public bool FireWithoutLockedTarget { get; private set; } = true;
 
     [Tooltip("Effects")]
     [field: SerializeField] public ParticleController MuzzleParticle { get; private set; }

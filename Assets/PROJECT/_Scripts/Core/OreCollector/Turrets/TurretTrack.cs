@@ -47,8 +47,6 @@ public class TurretTrack : State<TurretBase>
         }
 
         Owner.AimAtTarget(dt);
-
-        if (anglesOk)
-            Owner.TryFireShot();
+        Owner.TryFireShot();
     }
 }

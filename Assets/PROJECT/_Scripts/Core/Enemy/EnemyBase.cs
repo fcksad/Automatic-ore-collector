@@ -150,8 +150,7 @@ public class EnemyBase : MonoStateMachine<EnemyBase>, IDamageable, ITargetable
         float pushForward = b.extents.z + half.z + 0.02f;
         Vector3 start = b.center + transform.forward * pushForward;
 
-        int n = Physics.BoxCastNonAlloc(start, half, transform.forward, _hitsBuf, rot, len,
-                                        Config.ObstacleMask, QueryTriggerInteraction.Ignore);
+        int n = Physics.BoxCastNonAlloc(start, half, transform.forward, _hitsBuf, rot, len, Config.ObstacleMask, QueryTriggerInteraction.Ignore);
         if (n <= 0) return false;
 
         for (int i = 0; i < n; i++)

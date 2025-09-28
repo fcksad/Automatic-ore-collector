@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1418689502474078667}
   - component: {fileID: 4802981950640508766}
   - component: {fileID: 1458297234740244358}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Barrel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -118,7 +118,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1489467483369318276}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: MuzzlePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -150,7 +150,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8358140074178800794}
   - component: {fileID: 7918333890521369631}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: SingleTurrets
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -186,7 +186,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ad9d750b69fd6c4eac81c0ec674fcf7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _config: {fileID: 11400000, guid: b8ccad93226263746ae940d939849c31, type: 2}
+  <Config>k__BackingField: {fileID: 0}
   _basePivot: {fileID: 8358140074178800794}
   _headPivot: {fileID: 1855399807769405862}
   _muzzlePos:
@@ -203,7 +203,7 @@ GameObject:
   - component: {fileID: 1334304052281746134}
   - component: {fileID: 255210128404516794}
   - component: {fileID: 5162366278468332151}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cube (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -311,7 +311,7 @@ GameObject:
   - component: {fileID: 866077270399309813}
   - component: {fileID: 2842438220960506433}
   - component: {fileID: 2527151156875614846}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -416,7 +416,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1855399807769405862}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -453,7 +453,7 @@ GameObject:
   - component: {fileID: 5962865243512827839}
   - component: {fileID: 1938031442824543318}
   - component: {fileID: 1286548141721640484}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cylinder
   m_TagString: Untagged
   m_Icon: {fileID: 0}

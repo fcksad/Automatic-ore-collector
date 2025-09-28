@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9136266743311509654}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -47,7 +47,7 @@ GameObject:
   - component: {fileID: 5394578932477349955}
   - component: {fileID: 1914211294823580497}
   - component: {fileID: 8996836117561140568}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cylinder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -154,7 +154,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1040461082733872076}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: MuzzlePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -185,7 +185,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6900545338083002869}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: MuzzlePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -219,7 +219,7 @@ GameObject:
   - component: {fileID: 2733053417951075967}
   - component: {fileID: 4739892334703154619}
   - component: {fileID: 7547717702211128780}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Barrel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -328,7 +328,7 @@ GameObject:
   - component: {fileID: 897890064723949815}
   - component: {fileID: 7186250690063156865}
   - component: {fileID: 241733375782465829}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cube (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -436,7 +436,7 @@ GameObject:
   - component: {fileID: 351909034524813515}
   - component: {fileID: 2480834476023032150}
   - component: {fileID: 5496933678984473916}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -542,7 +542,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7157783087731342985}
   - component: {fileID: 656962895556796561}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: DoubleTurrets
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -578,7 +578,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ad9d750b69fd6c4eac81c0ec674fcf7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _config: {fileID: 11400000, guid: a5677c4bd06aafd408351082b7b3f33b, type: 2}
+  <Config>k__BackingField: {fileID: 0}
   _basePivot: {fileID: 7157783087731342985}
   _headPivot: {fileID: 9136266743311509654}
   _muzzlePos:
@@ -596,7 +596,7 @@ GameObject:
   - component: {fileID: 6827724100696037581}
   - component: {fileID: 5684611834180885329}
   - component: {fileID: 2295673232972146594}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Barrel (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
