@@ -10,7 +10,6 @@ public class VehicleBase : MonoBehaviour, IControllable , IDamageable
     [SerializeField] private Rigidbody _rb;
     [SerializeField] private VehicleController _controller;
 
-
     [Header("Decals")]
     [SerializeField] private TrackStampsInstanced _trackStampsInstanced;
     [SerializeField] private List<Transform> _decalPoints = new List<Transform>();
@@ -34,7 +33,11 @@ public class VehicleBase : MonoBehaviour, IControllable , IDamageable
     private void FixedUpdate()
     {
         float dt = Time.fixedDeltaTime;
-        _rb.linearVelocity = transform.forward * (_moveInput * _vehicleConfig.MoveSpeed);
+
+        Vector3 delta = transform.forward * (_moveInput * _vehicleConfig.MoveSpeed * dt);
+        delta.y = 0f; 
+        _rb.MovePosition(_rb.position + delta);
+
         float deltaYaw = -_turnInput * _vehicleConfig.RotateSpeed * dt;
         _rb.MoveRotation(_rb.rotation * Quaternion.Euler(0f, deltaYaw, 0f));
 
