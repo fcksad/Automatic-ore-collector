@@ -23,11 +23,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 483833774080
-    m_Localized: Ausfahrt
+    m_Localized: Beenden
     m_Metadata:
       m_Items: []
   - m_Id: 373070594048
-    m_Localized: Speisekarte
+    m_Localized: "Men\xFC"
     m_Metadata:
       m_Items: []
   - m_Id: 460635078656
@@ -39,11 +39,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1704313323520
-    m_Localized: VSynce
+    m_Localized: VSync
     m_Metadata:
       m_Items: []
   - m_Id: 1497316032512
-    m_Localized: Kontrollen
+    m_Localized: Steuerungen
     m_Metadata:
       m_Items: []
   - m_Id: 1604430168064

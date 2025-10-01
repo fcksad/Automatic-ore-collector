@@ -19,7 +19,7 @@ MonoBehaviour:
     m_Items: []
   m_TableData:
   - m_Id: 518558416896
-    m_Localized: Z powrotem
+    m_Localized: Wstecz
     m_Metadata:
       m_Items: []
   - m_Id: 483833774080
@@ -35,15 +35,15 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 12318507008
-    m_Localized: "Gra\u0107"
+    m_Localized: Graj
     m_Metadata:
       m_Items: []
   - m_Id: 1704313323520
-    m_Localized: VSynce
+    m_Localized: VSync
     m_Metadata:
       m_Items: []
   - m_Id: 1497316032512
-    m_Localized: Sterownica
+    m_Localized: Sterowanie
     m_Metadata:
       m_Items: []
   - m_Id: 1604430168064
