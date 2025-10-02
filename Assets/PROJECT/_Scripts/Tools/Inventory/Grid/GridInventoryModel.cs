@@ -1,22 +1,11 @@
+using System;
+
 namespace Inventory
 {
     public class GridInventoryModel : InventoryModelBase
     {
-        public override int Capacity => throw new System.NotImplementedException();
-
-        public override bool AddItem(InventoryItem item)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public override bool CanAdd(InventoryItem item)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public override bool RemoveItem(InventoryItem item)
-        {
-            throw new System.NotImplementedException();
-        }
+        private readonly int _capacity;
+        public GridInventoryModel(int width, int height) => _capacity = Math.Max(0, width * height);
+        public override int Capacity => _capacity;
     }
 }

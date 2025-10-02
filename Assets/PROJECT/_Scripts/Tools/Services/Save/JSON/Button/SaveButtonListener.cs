@@ -14,4 +14,9 @@ public class SaveButtonListener : CustomButton
     {
         _saveService.SaveSettings();
     }
+
+    private void OnDestroy()
+    {
+        Button.onClick.RemoveListener(SaveSettings);
+    }
 }

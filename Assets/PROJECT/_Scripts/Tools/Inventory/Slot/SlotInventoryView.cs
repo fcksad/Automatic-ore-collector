@@ -2,24 +2,19 @@ using UnityEngine;
 
 namespace Inventory
 {
-    public class SlotInventoryView : MonoBehaviour, IInventoryView<ListInventoryModel>
+    public class SlotInventoryView : MonoBehaviour, IInventoryView
     {
+        public void Bind(IInventoryModel model)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public void Initialize(ListInventoryModel model)
         {
             throw new System.NotImplementedException();
         }
 
-        public void OnItemAdded(InventoryItem item)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void OnItemRemoved(InventoryItem item)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void Refresh()
+        public void Rebuild()
         {
             throw new System.NotImplementedException();
         }

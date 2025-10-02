@@ -5,10 +5,12 @@ namespace Inventory
     public interface IInventoryModel
     {
         int Capacity { get; }
-        IReadOnlyList<InventoryItem> Items { get; }
+        IReadOnlyList<IInventoryItem> Items { get; }
+        event System.Action Changed;
 
-        bool CanAdd(InventoryItem item);
-        bool AddItem(InventoryItem item);
-        bool RemoveItem(InventoryItem item);
+        bool MoveOrMerge(int fromIndex, int index);
+        void Sort(IInventorySorter sort);
+        bool TryAdd(IInventoryItem item);
+        bool TryRemoveAt(int index, int count = int.MaxValue);
     }
 }

@@ -2,7 +2,6 @@ namespace Service
 {
     public class ScreenFadeController : IInitializable, IDisposable
     {
-
         private ScreenFadeView _view;
         private ISceneService _sceneService;
 

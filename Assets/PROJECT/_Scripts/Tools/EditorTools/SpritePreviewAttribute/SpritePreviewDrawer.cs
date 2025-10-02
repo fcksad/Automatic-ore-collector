@@ -11,8 +11,12 @@ public class SpritePreviewDrawer : PropertyDrawer
         if (property.propertyType != SerializedPropertyType.ObjectReference)
             return EditorGUI.GetPropertyHeight(property, label, true);
 
-        return Mathf.Max(EditorGUIUtility.singleLineHeight, a.Height) + EditorGUIUtility.standardVerticalSpacing;
+        var viewW = EditorGUIUtility.currentViewWidth; 
+        bool stacked = ShouldStack(a, viewW);
+        float baseH = EditorGUIUtility.singleLineHeight;
+        return stacked ? baseH + a.Height + EditorGUIUtility.standardVerticalSpacing : Mathf.Max(baseH, a.Height) + EditorGUIUtility.standardVerticalSpacing;
     }
+
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         var a = (SpritePreviewAttribute)attribute;
@@ -25,58 +29,106 @@ public class SpritePreviewDrawer : PropertyDrawer
         }
 
         float labelW = EditorGUIUtility.labelWidth;
-        var labelRect = new Rect(position.x, position.y, labelW, EditorGUIUtility.singleLineHeight);
+        var lineRect = new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
+
+        var labelRect = new Rect(lineRect.x, lineRect.y, labelW, lineRect.height);
         EditorGUI.LabelField(labelRect, label);
 
+        bool stacked = ShouldStack(a, position.width + labelW);
+
+        Rect fieldRect = default;
         if (a.ShowObjectField)
         {
-            float fieldW = Mathf.Min(a.FieldWidth, Mathf.Max(0, position.width - labelW)); 
-            var fieldRect = new Rect(position.x + labelW, position.y, fieldW, EditorGUIUtility.singleLineHeight);
+            float fieldW = Mathf.Min(a.FieldWidth, Mathf.Max(0f, lineRect.width - labelW));
+            fieldRect = new Rect(lineRect.x + labelW, lineRect.y, fieldW, lineRect.height);
             EditorGUI.PropertyField(fieldRect, property, GUIContent.none);
         }
 
-        var previewX = position.x + labelW + (a.ShowObjectField ? a.FieldWidth + 6f : 4f);
-        var previewRect = new Rect(previewX, position.y, position.xMax - previewX, a.Height);
+        Rect previewRect;
+        if (stacked)
+        {
+            float y = lineRect.y + lineRect.height + EditorGUIUtility.standardVerticalSpacing;
+            previewRect = new Rect(position.x + 2f, y, position.width - 4f, a.Height);
+        }
+        else
+        {
+            float previewX = a.ShowObjectField ? fieldRect.xMax + 6f : (lineRect.x + labelW + 4f);
+
+            float w = Mathf.Max(0f, lineRect.xMax - previewX);
+            previewRect = new Rect(previewX, position.y, w, Mathf.Max(lineRect.height, a.Height));
+        }
+
         DrawPreview(previewRect, property, a);
+    }
+
+    private static bool ShouldStack(SpritePreviewAttribute a, float availableWidth)
+    {
+        if (a.Layout == SpritePreviewLayout.InlineRight) return false;
+        if (a.Layout == SpritePreviewLayout.StackedBelow) return true;
+
+        return availableWidth < (EditorGUIUtility.labelWidth + a.FieldWidth + a.MinInlineWidth);
     }
 
     private void DrawPreview(Rect rect, SerializedProperty property, SpritePreviewAttribute a)
     {
         var obj = property.objectReferenceValue;
 
-        EditorGUI.DrawRect(rect, new Color(0, 0, 0, 0.08f));
-
+        EditorGUI.DrawRect(rect, new Color(0, 0, 0, 0.06f));
         if (!obj)
         {
-            GUI.Label(rect, "— no sprite —", EditorStyles.centeredGreyMiniLabel);
+            var style = new GUIStyle(EditorStyles.centeredGreyMiniLabel) { alignment = TextAnchor.MiddleCenter };
+            GUI.Label(rect, "— no sprite —", style);
             return;
         }
 
         Texture tex = null;
         Rect uv = new Rect(0, 0, 1, 1);
-        float aspect = 1f;
+        float srcW = 1f, srcH = 1f;
 
         if (obj is Sprite sp && sp.texture)
         {
             tex = sp.texture;
             var tr = sp.textureRect;
             uv = new Rect(tr.x / tex.width, tr.y / tex.height, tr.width / tex.width, tr.height / tex.height);
-            aspect = tr.width / tr.height;
+            srcW = tr.width;  
+            srcH = tr.height; 
         }
         else if (obj is Texture2D t2)
         {
             tex = t2;
-            aspect = (float)tex.width / tex.height;
+            srcW = tex.width;
+            srcH = tex.height;
         }
-
-        FitRectWithAspect(ref rect, aspect);
 
         if (tex)
         {
-            GUI.DrawTextureWithTexCoords(rect, tex, uv, true);
+            Rect drawRect;
+
+            if (a.ScaleMode == SpritePreviewScaleMode.TargetPixels)
+            {
+                float longSide = Mathf.Max(srcW, srcH);
+                float scale = a.TargetSizePx / Mathf.Max(1f, longSide);
+                if (!a.AllowUpscale) scale = Mathf.Min(scale, 1f);
+
+                float w = srcW * scale;
+                float h = srcH * scale;
+
+                float cx = rect.x + rect.width * 0.5f;
+                float cy = rect.y + rect.height * 0.5f;
+                drawRect = new Rect(cx - w * 0.5f, cy - h * 0.5f, w, h);
+            }
+            else 
+            {
+                float aspect = srcW / Mathf.Max(1f, srcH);
+                var fitRect = rect;
+                FitRectWithAspect(ref fitRect, aspect);
+                drawRect = fitRect;
+            }
+
+            GUI.DrawTextureWithTexCoords(drawRect, tex, uv, true);
 
             var e = Event.current;
-            if (rect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
+            if (drawRect.Contains(e.mousePosition) && e.type == EventType.MouseDown)
             {
                 if (e.clickCount == 2) { Selection.activeObject = obj; EditorGUIUtility.PingObject(obj); e.Use(); }
                 else if (a.PingOnClick) { EditorGUIUtility.PingObject(obj); e.Use(); }

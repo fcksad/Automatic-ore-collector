@@ -1,11 +1,9 @@
 namespace Inventory
 {
-    public interface IInventoryView<TModel> where TModel : IInventoryModel
+    public interface IInventoryView
     {
-        void Initialize(TModel model);
-        void Refresh();
-        void OnItemAdded(InventoryItem item);
-        void OnItemRemoved(InventoryItem item);
+        public void Bind(IInventoryModel model);
+        public void Rebuild();
     }
 
 }

@@ -120,7 +120,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7266cfecc09267646b696090bbd4f496, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _loadingScreen: {fileID: 6608234807474144382}
   _fadeImage: {fileID: 7378242002057825447}
 --- !u!1 &6608234807474144382
 GameObject:

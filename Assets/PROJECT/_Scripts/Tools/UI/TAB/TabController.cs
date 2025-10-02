@@ -19,6 +19,8 @@ public class TabController : MonoBehaviour
             var capturedToggle = toggle;
             toggle.ToggleButton.Button.onClick.AddListener(() => Select(capturedToggle.ToggleButton));
         }
+
+        Select(_tabLink[0].ToggleButton);
     }
 
     private void Select(CustomButton selected)

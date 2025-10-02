@@ -17,4 +17,9 @@ public class AudioButtonListener : CustomButton
     {
         _audioService.Play(_soundConfig);
     }
+
+    private void OnDestroy()
+    {
+        Button.onClick.RemoveListener(PlaySound);
+    }
 }

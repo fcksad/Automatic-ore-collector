@@ -15,4 +15,10 @@ public class ExitButtonListener : CustomButton
         Application.Quit();
 #endif
     }
+
+
+    private void OnDestroy()
+    {
+        Button.onClick.RemoveListener(ExitGame);
+    }
 }
