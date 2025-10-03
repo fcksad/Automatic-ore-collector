@@ -1,63 +1,56 @@
+using Service;
+using System.Collections.Generic;
 using UnityEngine;
+
 namespace Inventory
 {
     public class InventoryDevMenuController : MonoBehaviour
     {
 
         [Header("Item to spawn")]
-        public InventoryItemConfig Config;
+        [field: SerializeField]public List<InventoryItemConfig> Configs {  get; private set; } = new List<InventoryItemConfig>();
         [Min(1)] public int Stack = 1;
 
-        [Header("Grid")]
-        public GridInventoryView Grid;
-        [Min(1)] public int Width = 5;
-        [Min(1)] public int Height = 4;
-
-        private GridInventoryModel _model;
-
-        private void Awake()
-        {
-            _model = new GridInventoryModel(Width, Height);
-            if (Grid != null) Grid.Bind(_model);
-        }
+        private InventoryGridController _inventoryGridController;
+        private IInputService _inputService;
 
         private void Start()
         {
+            _inventoryGridController = SceneServiceLocator.Current.Get<InventoryGridController>();
+            _inputService = ServiceLocator.Get<IInputService>();
+
             SpawnItem();
             SpawnItem();
             SpawnItem();
             SpawnItem();
             SpawnItem();
+
+            _inputService.AddActionListener(CharacterAction.SpawnItem, SpawnItem);
         }
 
         [ContextMenu("SpawnItem")]
         public void SpawnItem()
         {
-            if (Config == null || _model == null) { Debug.LogWarning("No Config or model"); return; }
+            var randomValue = Random.Range(0, Configs.Count);
 
-
-            var item = new InventoryItemBase(Config, Mathf.Max(1, Stack));
-            var ok = _model.TryAdd(item);
-
-            if (!ok)
-                Debug.LogWarning("Inventory is full or item couldn't be added");
+            _inventoryGridController.AddItem(Configs[randomValue], Stack);
         }
 
-        [ContextMenu("Sort by name")]
+/*        [ContextMenu("Sort by name")]
         public void SortByName()
         {
             if (_model == null) return;
             _model.Sort(new SortByName());
-        }
+        }*/
 
-        [ContextMenu("Clear inventory")]
+/*        [ContextMenu("Clear inventory")]
         public void ClearAll()
         {
             if (_model == null) return;
 
             _model = new GridInventoryModel(Width, Height);
             Grid.Bind(_model); 
-        }
+        }*/
 
     }
 }

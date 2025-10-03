@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9190f6ddce95d0b4684418d7c0d7fc70, type: 3}
-  m_Name: InventoryItemConfig
+  m_Name: InventoryItemConfig 7
   m_EditorClassIdentifier: 
-  <Id>k__BackingField: 0
+  <Id>k__BackingField: 3
   <DisplayName>k__BackingField: A
-  <ItemType>k__BackingField: 0
-  <Icon>k__BackingField: {fileID: 1941810910, guid: 751940d7ad9f69f4dab2d20f848408ad, type: 3}
+  <ItemType>k__BackingField: 2
+  <Icon>k__BackingField: {fileID: -75167014, guid: 9030c9f15e630184782ebb2cecc44bd3, type: 3}
   <Weight>k__BackingField: 0
   <Description>k__BackingField: 
   <MaxStack>k__BackingField: 5

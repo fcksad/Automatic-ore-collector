@@ -10,4 +10,11 @@ public enum CharacterAction
     Scroll = 12,
 
 
+
+
+
+    //debug
+
+    SpawnItem = 1000,
+
 }

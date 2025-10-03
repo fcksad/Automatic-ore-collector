@@ -71,6 +71,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""SpawnItem"",
+                    ""type"": ""Button"",
+                    ""id"": ""c9182047-fc4c-4c3d-a56a-d2d40a1267c1"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -260,6 +269,17 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""action"": ""Scroll"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5448a311-1186-4b08-8592-bc9e56d4ae5f"",
+                    ""path"": ""<Keyboard>/i"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SpawnItem"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -870,6 +890,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
         m_Player_Rotate = m_Player.FindAction("Rotate", throwIfNotFound: true);
         m_Player_Scroll = m_Player.FindAction("Scroll", throwIfNotFound: true);
+        m_Player_SpawnItem = m_Player.FindAction("SpawnItem", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -955,6 +976,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Move;
     private readonly InputAction m_Player_Rotate;
     private readonly InputAction m_Player_Scroll;
+    private readonly InputAction m_Player_SpawnItem;
     public struct PlayerActions
     {
         private @InputSystem_Actions m_Wrapper;
@@ -964,6 +986,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         public InputAction @Move => m_Wrapper.m_Player_Move;
         public InputAction @Rotate => m_Wrapper.m_Player_Rotate;
         public InputAction @Scroll => m_Wrapper.m_Player_Scroll;
+        public InputAction @SpawnItem => m_Wrapper.m_Player_SpawnItem;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -988,6 +1011,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Scroll.started += instance.OnScroll;
             @Scroll.performed += instance.OnScroll;
             @Scroll.canceled += instance.OnScroll;
+            @SpawnItem.started += instance.OnSpawnItem;
+            @SpawnItem.performed += instance.OnSpawnItem;
+            @SpawnItem.canceled += instance.OnSpawnItem;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -1007,6 +1033,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Scroll.started -= instance.OnScroll;
             @Scroll.performed -= instance.OnScroll;
             @Scroll.canceled -= instance.OnScroll;
+            @SpawnItem.started -= instance.OnSpawnItem;
+            @SpawnItem.performed -= instance.OnSpawnItem;
+            @SpawnItem.canceled -= instance.OnSpawnItem;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -1202,6 +1231,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         void OnMove(InputAction.CallbackContext context);
         void OnRotate(InputAction.CallbackContext context);
         void OnScroll(InputAction.CallbackContext context);
+        void OnSpawnItem(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {
