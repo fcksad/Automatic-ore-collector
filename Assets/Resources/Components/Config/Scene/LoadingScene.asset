@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: LoadingScene
   m_EditorClassIdentifier: 
   <Scene>k__BackingField:
-    _sceneAsset: {fileID: 102900000, guid: 73e887a6565a24f4ba76f668929a77c0, type: 3}
+    _sceneAsset: {fileID: 0}
     _sceneName: LoadingScene

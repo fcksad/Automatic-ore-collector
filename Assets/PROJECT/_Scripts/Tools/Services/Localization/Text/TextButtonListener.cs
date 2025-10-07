@@ -17,7 +17,7 @@ public class TextButtonListener : MonoBehaviour
 
         if (_localizationConfig == null)
         {
-            Debug.LogWarning($"Localization config not found -  ${gameObject.name}");
+            Debug.LogWarning($"Localization config not found - {gameObject.name}");
             return;
         }
 

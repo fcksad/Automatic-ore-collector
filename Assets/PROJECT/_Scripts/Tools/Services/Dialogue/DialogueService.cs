@@ -26,7 +26,6 @@ namespace Service
 
 
             _dialogueView.OnLineFullyShownEvent += HandleAutoContinue;
-            _inputService.ChangeInputMap(InputMapType.UI);
             _inputService.AddActionListener(CharacterAction.Any, HandleSkip);
 
             _dialogueView.ShowView();
@@ -70,8 +69,6 @@ namespace Service
             _dialogueView.OnLineFullyShownEvent -= HandleAutoContinue;
             _dialogueView.HideView();
             _onComplete?.Invoke();
-
-            _inputService.ChangeInputMap(InputMapType.Player);
         }
 
         public void Stop()
@@ -79,9 +76,6 @@ namespace Service
             _dialogueView.OnLineFullyShownEvent -= HandleAutoContinue;
             _inputService.RemoveActionListener(CharacterAction.Any, HandleSkip);
             _dialogueView.HideView();
-
-            _inputService.ChangeInputMap(InputMapType.Player);
         }
     }
-
 }

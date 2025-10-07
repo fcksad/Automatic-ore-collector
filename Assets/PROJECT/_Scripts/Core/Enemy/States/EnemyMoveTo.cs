@@ -25,50 +25,49 @@ public class EnemyMoveTo : State<EnemyBase>
         Vector3 repel = Owner.AlliesRepulsion(1.2f, 0.6f);
         Vector3 dir = (dirTo.normalized + repel).normalized;
 
+        var rb = Owner.Rigidbody ? Owner.Rigidbody : Owner.GetComponent<Rigidbody>();
+        if (!rb) return;
+
         if (dir.sqrMagnitude > 1e-6f)
         {
-            Quaternion look = Quaternion.LookRotation(dir.normalized, Vector3.up);
-            Owner.transform.rotation = Quaternion.RotateTowards(
-                Owner.transform.rotation, look, Owner.RotSpeedDeg);
-        }
-
-        if (Owner.FrontBlocked(out _))
-        {
-            Vector3 steerDir = Vector3.zero;
-            bool stillBlocked = Owner.HandleObstacleBlocked(ref steerDir);
-
-            if (!stillBlocked)
-            {
-                float spdTurn = (Owner.Config ? Owner.Config.SkirtTurnSpeed : 180f) * dt;
-                Quaternion look = Quaternion.LookRotation(steerDir, Vector3.up);
-                Owner.transform.rotation = Quaternion.RotateTowards(Owner.transform.rotation, look, spdTurn);
-
-                Owner.transform.position += steerDir.normalized * (Owner.MoveSpeed * dt);
-                return;
-            }
+            Quaternion look = Quaternion.LookRotation(dir, Vector3.up);
+            float angStep = Owner.Config.RotationSpeed * dt; 
+            if (rb.isKinematic)
+                rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, look, angStep));
             else
-            {
-                Owner.MaybeFlipObstaclePolicy();
-            }
-            return;
+                rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, look, angStep));
         }
 
+        const float brakeEps = 0.05f;
+        float desiredSep = Owner.AttackRange + brakeEps;
+        const float slowRadius = 0.8f;
+
+        float speedK = Mathf.Clamp01((sep - desiredSep) / slowRadius);
+        float targetSpeed = Owner.Config.MoveSpeed * speedK;
+
+        Vector3 to = t.transform.position - Owner.transform.position; to.y = 0f;
+        float angle = Vector3.Angle(Owner.transform.forward, to);
+        if (angle < 12f && sep <= desiredSep) targetSpeed = 0f;
+
+        Vector3 moveDir = (dir.sqrMagnitude > 1e-6f) ? dir : Owner.transform.forward;
+        Vector3 desiredVel = moveDir.normalized * targetSpeed;
+
+        Vector3 v = rb.linearVelocity;
+        Vector3 vHor = new Vector3(v.x, 0f, v.z);
+        Vector3 dv = desiredVel - vHor;
+
+        float maxAccel = (Owner.Config ? Mathf.Max(10f, Owner.Config.MoveSpeed * 6f) : 30f);
+        float maxDv = maxAccel * dt;
+        if (dv.magnitude > maxDv) dv = dv.normalized * maxDv;
+
+        if (rb.isKinematic)
         {
-            float step = Owner.MoveSpeed * dt;
-
-            const float brakeEps = 0.05f;
-            float desiredSep = Owner.AttackRange + brakeEps;
-
-            if (sep - step < desiredSep)
-                step = Mathf.Max(0f, sep - desiredSep);
-
-            Vector3 to = t.transform.position - Owner.transform.position; to.y = 0f;
-            float angle = Vector3.Angle(Owner.transform.forward, to);
-            if (angle < 12f && sep <= desiredSep) step = 0f;
-
-            Vector3 moveDir = (dir.sqrMagnitude > 1e-6f) ? dir : Owner.transform.forward;
-            if (step > 0f)
-                Owner.transform.position += moveDir.normalized * step;
+            Vector3 step = new Vector3(dv.x, 0f, dv.z) * dt; 
+            rb.MovePosition(rb.position + step);
+        }
+        else
+        {
+            rb.AddForce(new Vector3(dv.x, 0f, dv.z), ForceMode.VelocityChange);
         }
 
         if (sep <= Owner.AttackRange + attackHysteresis)

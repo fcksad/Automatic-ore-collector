@@ -36,21 +36,27 @@ namespace Inventory
             _inventoryGridController.AddItem(Configs[randomValue], Stack);
         }
 
-/*        [ContextMenu("Sort by name")]
-        public void SortByName()
-        {
-            if (_model == null) return;
-            _model.Sort(new SortByName());
-        }*/
+        /*        [ContextMenu("Sort by name")]
+                public void SortByName()
+                {
+                    if (_model == null) return;
+                    _model.Sort(new SortByName());
+                }*/
 
-/*        [ContextMenu("Clear inventory")]
-        public void ClearAll()
-        {
-            if (_model == null) return;
+        /*        [ContextMenu("Clear inventory")]
+                public void ClearAll()
+                {
+                    if (_model == null) return;
 
-            _model = new GridInventoryModel(Width, Height);
-            Grid.Bind(_model); 
-        }*/
+                    _model = new GridInventoryModel(Width, Height);
+                    Grid.Bind(_model); 
+                }*/
+
+
+        private void OnDestroy()
+        {
+            _inputService.RemoveActionListener(CharacterAction.SpawnItem, SpawnItem);
+        }
 
     }
 }

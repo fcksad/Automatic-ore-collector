@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <VehicleId>k__BackingField: 0
   <MoveSpeed>k__BackingField: 5
-  <RotateSpeed>k__BackingField: 15
+  <RotateSpeed>k__BackingField: 20
   TrackStamps: {fileID: 11400000, guid: a5b72c464e3c4f64291ba98fa1c7da90, type: 2}
   <CollectSpeed>k__BackingField: 5
   <ArmorValue>k__BackingField: 5

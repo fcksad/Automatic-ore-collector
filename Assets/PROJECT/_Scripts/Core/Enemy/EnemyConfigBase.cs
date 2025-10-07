@@ -8,7 +8,8 @@ public class EnemyConfigBase : ScriptableObject
     [field: SerializeField] public string EnemyID { get; private set; }
 
     [Tooltip("")]
-    [field: SerializeField] public float MoveSpeed { get; private set; } = 5;
+    [field: SerializeField] public float MoveSpeed { get; private set; } = 2;
+    [field: SerializeField] public float MaxMoveSpeed { get; private set; } = 5;
     [field: SerializeField] public float RotationSpeed { get; private set; } = 60;
     [field: SerializeField] public float Health { get; private set; } = 10;
     [field: SerializeField] public float Damage { get; private set; } = 1;

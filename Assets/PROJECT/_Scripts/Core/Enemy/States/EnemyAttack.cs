@@ -24,22 +24,20 @@ public class EnemyAttack : State<EnemyBase>
             return;
         }
 
-        Vector3 dir = Owner.DirToClosest(t.transform);
+        Vector3 dir = t.transform.position - Owner.transform.position;
+        dir.y = 0f;
+
         if (dir.sqrMagnitude > 1e-6f)
         {
-            Quaternion look = Quaternion.LookRotation(dir, Vector3.up);
-            Owner.transform.rotation = Quaternion.RotateTowards(Owner.transform.rotation, look, Owner.RotSpeedDeg);
+            var look = Quaternion.LookRotation(dir, Vector3.up);
+
+            Owner.transform.rotation = Quaternion.RotateTowards(Owner.transform.rotation, look, Owner.Config.RotationSpeed * Time.deltaTime);
         }
 
         if (Time.time >= _nextTime)
         {
             _nextTime = Time.time + 1f / Mathf.Max(0.001f, Owner.Config.AttackSpeed);
-
-            var dmg = t.GetComponent<IDamageable>();
-            if (dmg != null) dmg.ApplyDamage(Owner.Config.Damage);
-
-            // FX/SFX Ч по желанию
-
+            t.GetComponent<IDamageable>()?.ApplyDamage(Owner.Config.Damage);
         }
     }
 }

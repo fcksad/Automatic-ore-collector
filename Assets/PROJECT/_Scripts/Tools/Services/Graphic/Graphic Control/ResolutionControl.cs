@@ -3,7 +3,6 @@ using UnityEngine;
 using TMPro;
 using Service;
 using System.Linq;
-using Unity.VisualScripting;
 
 namespace Settings
 {
@@ -38,10 +37,9 @@ namespace Settings
                 }
             }
 
-            _filteredResolutions = _filteredResolutions
-                .DistinctBy(r => (r.width, r.height, Mathf.RoundToInt((float)r.refreshRateRatio.numerator / r.refreshRateRatio.denominator)))
-                .OrderBy(r => r.width * r.height)
-                .ToList();
+            _filteredResolutions = _filteredResolutions.GroupBy(r => 
+            (r.width, r.height,Refresh: Mathf.RoundToInt((float)r.refreshRateRatio.numerator / r.refreshRateRatio.denominator)))
+            .Select(g => g.First()).OrderBy(r => r.width * r.height).ToList();
 
             if (_filteredResolutions.Count == 0)
             {

@@ -14,7 +14,6 @@ public class VehicleController : MonoBehaviour
     private void Awake()
     {
         _inputService = ServiceLocator.Get<IInputService>();
-        _inputService.ChangeInputMap(InputMapType.Player);
 
         _instantiateFactory = ServiceLocator.Get<IInstantiateFactoryService>();
     }

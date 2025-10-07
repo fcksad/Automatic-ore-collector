@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: EnemyConfig
   m_EditorClassIdentifier: 
   <EnemyID>k__BackingField: 01
-  <MoveSpeed>k__BackingField: 2
-  <RotationSpeed>k__BackingField: 60
+  <MoveSpeed>k__BackingField: 5
+  <MaxMoveSpeed>k__BackingField: 12
+  <RotationSpeed>k__BackingField: 180
   <Health>k__BackingField: 80.06
   <Damage>k__BackingField: 1
   <AttackSpeed>k__BackingField: 4
