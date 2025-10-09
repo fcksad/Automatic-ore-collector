@@ -22,8 +22,18 @@ public class EnemyMoveTo : State<EnemyBase>
 
         Vector3 slotPos = Owner.GetTargetSlotPosition();
         Vector3 dirTo = slotPos - Owner.transform.position; dirTo.y = 0f;
-        Vector3 repel = Owner.AlliesRepulsion(1.2f, 0.6f);
+        Vector3 repel = Owner.AlliesRepulsion(1.2f, 0.6f, dt);
+        float near = Mathf.InverseLerp(Owner.AttackRange + 0.4f, Owner.AttackRange, Owner.SeparationTo(t.transform));
+        repel *= (1f - 0.6f * near);
         Vector3 dir = (dirTo.normalized + repel).normalized;
+
+        var fwd = Owner.transform.forward;
+        if (Vector3.Dot(dir, fwd) < -0.2f)
+        {
+            Vector3 sideL = Vector3.Cross(Vector3.up, fwd).normalized;
+            Vector3 sideR = -sideL;
+            dir = (Vector3.Dot(dir, sideL) >= 0f) ? sideL : sideR;
+        }
 
         var rb = Owner.Rigidbody ? Owner.Rigidbody : Owner.GetComponent<Rigidbody>();
         if (!rb) return;
@@ -38,7 +48,7 @@ public class EnemyMoveTo : State<EnemyBase>
                 rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, look, angStep));
         }
 
-        const float brakeEps = 0.05f;
+        const float brakeEps = 0.12f;
         float desiredSep = Owner.AttackRange + brakeEps;
         const float slowRadius = 0.8f;
 
@@ -49,15 +59,14 @@ public class EnemyMoveTo : State<EnemyBase>
         float angle = Vector3.Angle(Owner.transform.forward, to);
         if (angle < 12f && sep <= desiredSep) targetSpeed = 0f;
 
-        Vector3 moveDir = (dir.sqrMagnitude > 1e-6f) ? dir : Owner.transform.forward;
+        Vector3 moveDir = (dir.sqrMagnitude > 1e-6f) ? dir : fwd;
         Vector3 desiredVel = moveDir.normalized * targetSpeed;
 
         Vector3 v = rb.linearVelocity;
         Vector3 vHor = new Vector3(v.x, 0f, v.z);
         Vector3 dv = desiredVel - vHor;
 
-        float maxAccel = (Owner.Config ? Mathf.Max(10f, Owner.Config.MoveSpeed * 6f) : 30f);
-        float maxDv = maxAccel * dt;
+        float maxDv = Owner.Config.MaxMoveSpeed * dt;
         if (dv.magnitude > maxDv) dv = dv.normalized * maxDv;
 
         if (rb.isKinematic)

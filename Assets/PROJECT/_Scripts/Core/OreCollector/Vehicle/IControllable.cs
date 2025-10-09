@@ -3,9 +3,9 @@ using UnityEngine;
 public interface IControllable 
 {
 
-    void Rotate(Vector2 value);
+    void Rotate(float value);
 
-    void Move(Vector2 value);
+    void Move(float value);
 
 
 }

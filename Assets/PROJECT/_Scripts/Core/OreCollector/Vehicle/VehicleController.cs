@@ -27,8 +27,8 @@ public class VehicleController : MonoBehaviour
     {
         if (_controllables.Count == 0 || _inputService == null) return;
 
-        var move = _inputService.GetVector2(CharacterAction.Move);
-        var rotate = _inputService.GetVector2(CharacterAction.Rotate);
+        var move = _inputService.GetVector2(CharacterAction.Move).y;
+        var rotate = _inputService.GetVector2(CharacterAction.Move).x;
 
         foreach (var c in _controllables)
         {

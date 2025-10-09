@@ -4,16 +4,16 @@ using UnityEngine.Rendering;
 public class TrackStampsInstanced : MonoBehaviour
 {
     [Header("Applied at runtime")]
-    [SerializeField] private Material material;
-    [SerializeField] private Vector2 stampSize = new Vector2(1.3f, 0.25f);
-    [SerializeField] private int maxStamps = 3000;
+    [field: SerializeField] public Material Material {  get; private set; }
+    [SerializeField] public Vector2 StampSize { get; private set; } = new Vector2(1.3f, 0.25f);
+    [SerializeField] public int MaxStamps { get; private set; } = 3000;
 
     [Header("Ground Projection")]
-    [SerializeField] private bool groundOnly = true;
-    [SerializeField] private LayerMask groundMask = ~0;     
-    [SerializeField] private float raycastStart = 1.5f;    
-    [SerializeField] private float raycastDistance = 3.0f;  
-    [SerializeField] private float groundStick = 0.003f;    
+    [field: SerializeField] public bool GroundOnly { get; private set; } = true;
+    [field: SerializeField] public LayerMask GroundMask { get; private set; } = ~0;
+    [field: SerializeField] public float RaycastStart { get; private set; } = 1;
+    [field: SerializeField] public float RaycastDistance { get; private set; } = 0.5f;  
+    [field: SerializeField] public float GroundStick { get; private set; } = 0.003f;    
 
     Mesh _quad;
     Vector3[] _pos;
@@ -25,38 +25,38 @@ public class TrackStampsInstanced : MonoBehaviour
     {
         if (cfg == null) return;
 
-        material = cfg.Material;
-        stampSize = cfg.StampSize;
-        groundStick = cfg.YOffset; 
+        Material = cfg.Material;
+        StampSize = cfg.StampSize;
+        GroundStick = cfg.YOffset; 
 
-        if (_quad == null || Mathf.Abs(_quad.bounds.size.x - stampSize.x) > 1e-4f)
-            _quad = BuildQuad(stampSize);
+        if (_quad == null || Mathf.Abs(_quad.bounds.size.x - StampSize.x) > 1e-4f)
+            _quad = BuildQuad(StampSize);
 
-        if (maxStamps != cfg.MaxStamps || _pos == null)
+        if (MaxStamps != cfg.MaxStamps || _pos == null)
         {
-            maxStamps = Mathf.Max(1, cfg.MaxStamps);
-            _pos = new Vector3[maxStamps];
-            _rot = new Quaternion[maxStamps];
+            MaxStamps = Mathf.Max(1, cfg.MaxStamps);
+            _pos = new Vector3[MaxStamps];
+            _rot = new Quaternion[MaxStamps];
             _head = _count = 0;
         }
 
-        if (material != null) material.enableInstancing = true;
+        if (Material != null) Material.enableInstancing = true;
     }
 
     void Awake()
     {
-        if (_quad == null) _quad = BuildQuad(stampSize);
-        if (_pos == null) { _pos = new Vector3[maxStamps]; _rot = new Quaternion[maxStamps]; }
+        if (_quad == null) _quad = BuildQuad(StampSize);
+        if (_pos == null) { _pos = new Vector3[MaxStamps]; _rot = new Quaternion[MaxStamps]; }
     }
 
     public void Add(Vector3 pos, Quaternion worldRot)
     {
-        if (groundOnly)
+        if (GroundOnly)
         {
-            Vector3 rayStart = pos + Vector3.up * raycastStart;
-            if (Physics.Raycast(rayStart, Vector3.down, out RaycastHit hit, raycastDistance + raycastStart, groundMask, QueryTriggerInteraction.Ignore))
+            Vector3 rayStart = pos + Vector3.up * RaycastStart;
+            if (Physics.Raycast(rayStart, Vector3.down, out RaycastHit hit, RaycastDistance + RaycastStart, GroundMask, QueryTriggerInteraction.Ignore))
             {
-                pos = hit.point + hit.normal * groundStick;
+                pos = hit.point + hit.normal * GroundStick;
 
                 Vector3 forward = Vector3.ProjectOnPlane(worldRot * Vector3.forward, hit.normal).normalized;
                 if (forward.sqrMagnitude < 1e-6f) forward = Vector3.Cross(hit.normal, Vector3.right).normalized;
@@ -70,13 +70,13 @@ public class TrackStampsInstanced : MonoBehaviour
         }
         else
         {
-            pos.y += groundStick;
+            pos.y += GroundStick;
         }
 
         _pos[_head] = pos;
         _rot[_head] = worldRot;
-        _head = (_head + 1) % maxStamps;
-        _count = Mathf.Min(_count + 1, maxStamps);
+        _head = (_head + 1) % MaxStamps;
+        _count = Mathf.Min(_count + 1, MaxStamps);
     }
 
     void OnEnable() => RenderPipelineManager.beginCameraRendering += OnBeginCameraRendering;
@@ -84,25 +84,25 @@ public class TrackStampsInstanced : MonoBehaviour
 
     void OnBeginCameraRendering(ScriptableRenderContext ctx, Camera cam)
     {
-        if (_count == 0 || material == null) return;
+        if (_count == 0 || Material == null) return;
 
         int left = _count;
-        int idx = (_head - _count + maxStamps) % maxStamps;
+        int idx = (_head - _count + MaxStamps) % MaxStamps;
 
         while (left > 0)
         {
             int n = Mathf.Min(1023, left);
             for (int i = 0; i < n; i++)
             {
-                int k = (idx + i) % maxStamps;
+                int k = (idx + i) % MaxStamps;
                 _batch[i] = Matrix4x4.TRS(_pos[k], _rot[k], Vector3.one);
             }
 
-            Graphics.DrawMeshInstanced(_quad, 0, material, _batch, n, null,
+            Graphics.DrawMeshInstanced(_quad, 0, Material, _batch, n, null,
                 ShadowCastingMode.Off, false, 0, cam, LightProbeUsage.Off);
 
             left -= n;
-            idx = (idx + n) % maxStamps;
+            idx = (idx + n) % MaxStamps;
         }
     }
 

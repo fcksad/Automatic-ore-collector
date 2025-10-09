@@ -9,6 +9,8 @@ namespace Service
         void RemoveActionListener(CharacterAction action, Action onStarted = null, Action onPerformed = null, Action onCanceled = null);
         bool IsPressed(CharacterAction action);
         public Vector2 GetVector2(CharacterAction action);
+        public float GetAxis(CharacterAction action);
+        public float GetAxisFromButtons(CharacterAction negative, CharacterAction positive);  
         void ChangeInputMap(InputMapType type);
         public string GetActionKey(CharacterAction action, string controlScheme);
     }

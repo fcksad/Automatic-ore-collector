@@ -64,6 +64,24 @@ namespace Service
             return Vector2.zero;
         }
 
+        public float GetAxis(CharacterAction action)
+        {
+            if (_actionDictionary.TryGetValue(action, out var config))
+            {
+                return config.InputReference.action.ReadValue<float>();
+            }
+
+            return 0f;
+        }
+
+        public float GetAxisFromButtons(CharacterAction negative, CharacterAction positive)
+        {
+            bool neg = IsPressed(negative);
+            bool pos = IsPressed(positive);
+            if (pos == neg) return 0f;
+            return pos ? 1f : -1f;
+        }
+
         public bool IsPressed(CharacterAction action)
         {
             return _actionDictionary.TryGetValue(action, out var config) && config.IsPressed();

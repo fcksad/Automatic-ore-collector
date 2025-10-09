@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class VehicleBase : MonoBehaviour, IControllable , IDamageable
 {
@@ -27,8 +29,8 @@ public class VehicleBase : MonoBehaviour, IControllable , IDamageable
         SetToControl();
     }
 
-    public void Move(Vector2 value) => _moveInput = Mathf.Clamp(value.y, -1f, 1f);
-    public void Rotate(Vector2 value) => _turnInput = Mathf.Clamp(-value.x, -1f, 1f);
+    public void Move(float value) => _moveInput = Mathf.Clamp(value, -1f, 1f);
+    public void Rotate(float value) => _turnInput = Mathf.Clamp(-value, -1f, 1f);
 
     private void FixedUpdate()
     {
@@ -101,4 +103,110 @@ public class VehicleBase : MonoBehaviour, IControllable , IDamageable
     {
         Debug.Log("Taked" +  damage);
     }
+
+
+#if UNITY_EDITOR
+
+
+private static readonly Color _stampFill = new Color(0f, 0.8f, 1f, 0.10f);
+private static readonly Color _stampLine = new Color(0f, 0.8f, 1f, 0.90f);
+private static GUIStyle _labelStyle;
+
+private void OnDrawGizmos()
+{
+    if (_vehicleConfig == null) return;
+    var cfg = _vehicleConfig.TrackStamps;
+    if (cfg == null) return;
+
+    if (_decalPoints == null || _decalPoints.Count == 0) return;
+
+    var tsi = _trackStampsInstanced;
+    bool proj = tsi != null && tsi.enabled && tsi.gameObject.activeInHierarchy && tsi.GroundOnly;
+
+    if (_labelStyle == null)
+    {
+        _labelStyle = new GUIStyle(EditorStyles.boldLabel)
+        {
+            fontSize = 11,
+            normal = { textColor = new Color(0f, 0.95f, 1f, 0.95f) }
+        };
+    }
+
+    Handles.zTest = CompareFunction.LessEqual; 
+
+    int previewCount = 4; 
+    float spacing = Mathf.Max(0.01f, cfg.Spacing);
+    Vector2 size = cfg.StampSize; 
+
+    foreach (var p in _decalPoints)
+    {
+        if (!p) continue;
+
+
+        Vector3 pos = p.position;
+        Quaternion rot = transform.rotation;
+
+        if (proj)
+        {
+            Vector3 rayStart = pos + Vector3.up * tsi.RaycastStart;
+            float dist = tsi.RaycastDistance + tsi.RaycastStart;
+            if (Physics.Raycast(rayStart, Vector3.down, out RaycastHit hit, dist, tsi.GroundMask, QueryTriggerInteraction.Ignore))
+            {
+                pos = hit.point + hit.normal * tsi.GroundStick;
+                Vector3 fwd = Vector3.ProjectOnPlane(transform.forward, hit.normal).normalized;
+                if (fwd.sqrMagnitude < 1e-6f) fwd = Vector3.Cross(hit.normal, Vector3.right).normalized;
+                rot = Quaternion.LookRotation(fwd, hit.normal);
+            }
+            else
+            {
+
+                pos += Vector3.up * (tsi ? tsi.GroundStick : 0f);
+                rot = Quaternion.LookRotation(transform.forward, Vector3.up);
+            }
+        }
+        else
+        {
+            pos += Vector3.up * (tsi ? tsi.GroundStick : 0f);
+            rot = Quaternion.LookRotation(transform.forward, Vector3.up);
+        }
+
+
+        for (int i = 0; i < previewCount; i++)
+        {
+            float alphaMul = Mathf.Lerp(1f, 0.2f, i / (float)(previewCount - 1));
+            Vector3 pStamp = pos + (rot * Vector3.forward) * spacing * i;
+            DrawStampRect(pStamp, rot, size, _stampFill * alphaMul, _stampLine);
+
+            if (i == 0)
+            {
+
+                Vector3 right = rot * Vector3.right * (size.x * 0.5f);
+                Vector3 fwd = rot * Vector3.forward * (size.y * 0.5f);
+
+                Handles.DrawLine(pStamp - right, pStamp + right);
+                Handles.DrawLine(pStamp - fwd, pStamp + fwd);
+
+                Handles.Label(pStamp + right + Vector3.up * 0.02f, $"Width X: {size.x:F2}m", _labelStyle);
+                Handles.Label(pStamp + fwd + Vector3.up * 0.02f, $"Length Y: {size.y:F2}m", _labelStyle);
+
+                Handles.ArrowHandleCap(0, pStamp, rot, size.y * 0.75f, EventType.Repaint);
+            }
+        }
+    }
+}
+
+private static void DrawStampRect(Vector3 center, Quaternion rot, Vector2 size, Color fill, Color line)
+{
+    Vector3 right = rot * Vector3.right * (size.x * 0.5f);
+    Vector3 fwd = rot * Vector3.forward * (size.y * 0.5f);
+
+    Vector3 a = center - right - fwd;
+    Vector3 b = center - right + fwd;
+    Vector3 c = center + right + fwd;
+    Vector3 d = center + right - fwd;
+
+    Handles.DrawSolidRectangleWithOutline(new[] { a, b, c, d }, fill, line);
+    Handles.DrawAAPolyLine(3f, a, b, c, d, a);
+}
+#endif
 }

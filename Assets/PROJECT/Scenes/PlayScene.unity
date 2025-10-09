@@ -1347,7 +1347,7 @@ MonoBehaviour:
   - {fileID: 185760873}
   - {fileID: 482744649}
   maxAlive: 1000
-  spawnInterval: 0.4
+  spawnInterval: 0.1
   ticksPerFrame: 12
   AliveCount: 0
 --- !u!1 &763610622
@@ -3061,6 +3061,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.y
       value: 30
       objectReference: {fileID: 0}
+    - target: {fileID: 1008317128983826963, guid: 829fbc32f213cd04185dfeb60af3dd3b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -2.83
+      objectReference: {fileID: 0}
+    - target: {fileID: 1008317128983826963, guid: 829fbc32f213cd04185dfeb60af3dd3b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -1.632
+      objectReference: {fileID: 0}
+    - target: {fileID: 1386379894436730042, guid: 829fbc32f213cd04185dfeb60af3dd3b, type: 3}
+      propertyPath: m_Icon
+      value: 
+      objectReference: {fileID: 7250588514170254948, guid: 0000000000000000d000000000000000, type: 0}
     - target: {fileID: 2811901323439623347, guid: 829fbc32f213cd04185dfeb60af3dd3b, type: 3}
       propertyPath: m_Mass
       value: 100
@@ -3125,8 +3137,44 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 6105759781230854629, guid: 829fbc32f213cd04185dfeb60af3dd3b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 2.83
+      objectReference: {fileID: 0}
+    - target: {fileID: 6105759781230854629, guid: 829fbc32f213cd04185dfeb60af3dd3b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -1.6319996
+      objectReference: {fileID: 0}
+    - target: {fileID: 7970072586696361913, guid: 829fbc32f213cd04185dfeb60af3dd3b, type: 3}
+      propertyPath: m_Icon
+      value: 
+      objectReference: {fileID: 7250588514170254948, guid: 0000000000000000d000000000000000, type: 0}
+    - target: {fileID: 7986374120355422671, guid: 829fbc32f213cd04185dfeb60af3dd3b, type: 3}
+      propertyPath: raycastStart
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7986374120355422671, guid: 829fbc32f213cd04185dfeb60af3dd3b, type: 3}
+      propertyPath: raycastDistance
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7986374120355422671, guid: 829fbc32f213cd04185dfeb60af3dd3b, type: 3}
       propertyPath: groundMask.m_Bits
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 7986374120355422671, guid: 829fbc32f213cd04185dfeb60af3dd3b, type: 3}
+      propertyPath: <Material>k__BackingField
+      value: 
+      objectReference: {fileID: 2100000, guid: 23fb094f6a79459468f5813872c97648, type: 2}
+    - target: {fileID: 7986374120355422671, guid: 829fbc32f213cd04185dfeb60af3dd3b, type: 3}
+      propertyPath: <StampSize>k__BackingField.x
+      value: 1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7986374120355422671, guid: 829fbc32f213cd04185dfeb60af3dd3b, type: 3}
+      propertyPath: <StampSize>k__BackingField.y
+      value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7986374120355422671, guid: 829fbc32f213cd04185dfeb60af3dd3b, type: 3}
+      propertyPath: <GroundMask>k__BackingField.m_Bits
       value: 64
       objectReference: {fileID: 0}
     - target: {fileID: 8566381521267183850, guid: 829fbc32f213cd04185dfeb60af3dd3b, type: 3}

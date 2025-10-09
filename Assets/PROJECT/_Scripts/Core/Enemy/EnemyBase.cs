@@ -1,4 +1,5 @@
 ﻿using FSM;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -23,11 +24,14 @@ public class EnemyBase : MonoStateMachine<EnemyBase>, IDamageable, ITargetable
 
     [SerializeField] private Collider _selfCol;
     private Collider[] _selfCols;
+    private HashSet<Collider> _selfSet;
+
     private Collider _targetCol;
     [SerializeField] private LayerMask _alliesMask;
     private static readonly Collider[] _allyBuf = new Collider[12];
 
     private float _slotAngleDeg;
+    private Vector3 _repelSmoothed;
 
     public float AttackRange => Config.AttackRange + 0.1f;
     protected override void Awake()
@@ -35,7 +39,7 @@ public class EnemyBase : MonoStateMachine<EnemyBase>, IDamageable, ITargetable
         base.Awake();
         if (!_selfCol) _selfCol = GetComponentInChildren<Collider>();
         _selfCols = GetComponentsInChildren<Collider>(includeInactive: true);
-
+        _selfSet = new HashSet<Collider>(_selfCols);
         _slotAngleDeg = (Mathf.Abs(GetInstanceID()) * 0.6180339f % 1f) * 360f;
     }
 
@@ -104,7 +108,7 @@ public class EnemyBase : MonoStateMachine<EnemyBase>, IDamageable, ITargetable
         return Vector3.Distance(pSelf, pTarget);
     }
 
-    public Vector3 AlliesRepulsion(float radius = 1.2f, float weight = 0.6f)
+    public Vector3 AlliesRepulsion(float radius = 1.2f, float weight = 0.6f, float dt = 0f)
     {
         int n = Physics.OverlapSphereNonAlloc(transform.position, radius, _allyBuf, _alliesMask, QueryTriggerInteraction.Ignore);
         Vector3 push = Vector3.zero;
@@ -112,7 +116,8 @@ public class EnemyBase : MonoStateMachine<EnemyBase>, IDamageable, ITargetable
         for (int i = 0; i < n; i++)
         {
             var c = _allyBuf[i];
-            if (!c || c == _selfCol) continue;
+            if (!c) continue;
+            if (IsSelfCollider(c)) continue;                              // ← ВАЖНО
             if (_targetCol && (c == _targetCol || c.transform.IsChildOf(Target.transform))) continue;
 
             Vector3 away = transform.position - c.ClosestPoint(transform.position);
@@ -120,13 +125,13 @@ public class EnemyBase : MonoStateMachine<EnemyBase>, IDamageable, ITargetable
             float d = away.magnitude;
             if (d > 0.001f)
             {
-                float k = 1f - Mathf.Clamp01(d / radius); 
+                float k = 1f - Mathf.Clamp01(d / radius);                 // линейное затухание
                 push += away.normalized * k;
             }
         }
 
-        if (push.sqrMagnitude > 1e-6f) push = push.normalized * weight;
-        return push;
+        if (push.sqrMagnitude > 1e-6f) push = Vector3.ClampMagnitude(push, 1f) * weight;
+        return SmoothRepel(push, dt);                                     // ← сглаживание
     }
 
     public Vector3 GetTargetSlotPosition(float extraRadius = 0.6f)
@@ -141,4 +146,15 @@ public class EnemyBase : MonoStateMachine<EnemyBase>, IDamageable, ITargetable
     {
         if (_alive) { _alive = false; BecameUnavailable?.Invoke(this); }
     }
+
+    private Vector3 SmoothRepel(Vector3 raw, float dt)
+    {
+        float alpha = 1f - Mathf.Exp(-8f * dt);
+        _repelSmoothed = Vector3.Lerp(_repelSmoothed, raw, alpha);
+        return _repelSmoothed;
+    }
+
+
+    private bool IsSelfCollider(Collider c) =>
+    c && (_selfSet != null && _selfSet.Contains(c)) || c.transform.IsChildOf(transform);
 }

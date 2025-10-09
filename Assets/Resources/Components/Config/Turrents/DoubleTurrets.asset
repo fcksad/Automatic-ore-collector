@@ -20,7 +20,7 @@ MonoBehaviour:
   <TargetMask>k__BackingField:
     serializedVersion: 2
     m_Bits: 256
-  <MinDetectionRadius>k__BackingField: 2
+  <MinDetectionRadius>k__BackingField: 1.5
   <DetectionRadius>k__BackingField: 35
   <FireRate>k__BackingField: 20
   <Damage>k__BackingField: 10
