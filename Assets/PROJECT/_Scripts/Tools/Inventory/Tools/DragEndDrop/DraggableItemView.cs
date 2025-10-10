@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -71,7 +72,6 @@ namespace Inventory
             _isDragging = false;
             DragContext.ClearIfOwner(this);
         }
-
         private void OnDisable() { _isDragging = false; if (_canvasGroup) { _canvasGroup.blocksRaycasts = true; _canvasGroup.alpha = 1f; } DragContext.ClearIfOwner(this); }
         private void OnDestroy() { _isDragging = false; DragContext.ClearIfOwner(this); }
 

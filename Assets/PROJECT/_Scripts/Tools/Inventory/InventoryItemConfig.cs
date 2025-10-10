@@ -15,6 +15,8 @@ namespace Inventory
         [field: SerializeField] public float Weight { get; private set; }
         [field: SerializeField] public string Description { get; private set; }
         [field: SerializeField] public int MaxStack { get; private set; } = 1;
+
+        [field: SerializeField] public Builder.ModuleConfig Module;
     }
 
 }

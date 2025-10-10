@@ -16,10 +16,10 @@ TagManager:
   - Enemy
   - Vehicle
   - Turrets
+  - Wheel
   - 
-  - 
-  - 
-  - 
+  - BuildGround
+  - ObstacleMask
   - 
   - 
   - 

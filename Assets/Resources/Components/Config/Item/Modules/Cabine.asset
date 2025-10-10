@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 693553fd70246c04f8e1a898063cdcc8, type: 3}
+  m_Name: Cabine
+  m_EditorClassIdentifier: 
+  <Id>k__BackingField: Cabine
+  <DisplayName>k__BackingField: Cabine
+  <Prefab>k__BackingField: {fileID: 2145740389987036217, guid: 636b69886a69efe49a01933bb92dff8e, type: 3}
+  <PowerDraw>k__BackingField: 0
+  <PowerSupply>k__BackingField: 0
+  <Mass>k__BackingField: 0
+  <HP>k__BackingField: 0
+  <Armor>k__BackingField: 0
+  <CabinPower>k__BackingField: 0
+  <Cost>k__BackingField: 0
+  <Energy>k__BackingField: 0
+  <CellSize>k__BackingField: 0.25
+  SizeCells: {x: 2, y: 1, z: 3}
+  <AllowedRotations>k__BackingField: 2
+  <ForwardAxis>k__BackingField: {x: 0, y: 0, z: 0}
+  FootprintCells:
+  - {x: 2, y: 1, z: 3}
+  <MinContactCells>k__BackingField: 0
