@@ -23,9 +23,9 @@ MonoBehaviour:
   <CabinPower>k__BackingField: 0
   <Cost>k__BackingField: 0
   <Energy>k__BackingField: 0
-  <CellSize>k__BackingField: 0.25
-  <AllowedRotations>k__BackingField: 1
-  <ForwardAxis>k__BackingField: {x: 0, y: 0, z: 0}
-  FootprintCells:
-  - {x: 1, y: 2, z: 1}
-  <MinContactCells>k__BackingField: 1
+  Footprint2D:
+  - {x: 0, y: 0}
+  RequiredOverlap: 1
+  MountHeight: 0.25
+  RotationMode: 0
+  BoundsSize: {x: 0.5, y: 0.5, z: 0.5}

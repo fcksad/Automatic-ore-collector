@@ -21,13 +21,10 @@ public static class UIChecker
     public static bool IsOverUI(Vector2 screenPos)
     {
         if (EventSystem.current == null) return false;
-        return GraphicRaycastAt(screenPos);
-    }
-
-    public static bool IsOverRect(RectTransform rect, Vector2 screenPos, Camera uiCamera = null)
-    {
-        if (!rect) return false;
-        return RectTransformUtility.RectangleContainsScreenPoint(rect, screenPos, uiCamera);
+        var data = new PointerEventData(EventSystem.current){ position = screenPos };
+        var results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(data, results);
+        return results.Count > 0;
     }
 
     private static Vector2 GetScreenPointerPosition()

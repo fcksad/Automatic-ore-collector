@@ -3,16 +3,11 @@ using UnityEngine.InputSystem;
 
 public class WorldPlacementBridge : MonoBehaviour
 {
-    public Builder.GridGhostPlacer Placer;
+    public Builder.ConnectorGridGhostPlacer Placer;
+    public Collider BuildVolume3D;    
+    public Camera WorldCamera;
 
-    [Header("Optional limits")]
-    public Collider BuildVolume3D;      
-    public Camera WorldCamera;        
-
-    void Awake()
-    {
-        if (!WorldCamera) WorldCamera = Camera.main;
-    }
+    void Awake() { if (!WorldCamera) WorldCamera = Camera.main; }
 
     void Update()
     {
@@ -22,30 +17,26 @@ public class WorldPlacementBridge : MonoBehaviour
         var pos = GetPointer();
         Placer?.SetExternalPointer(pos);
 
-        bool releasedThisFrame = WasPrimaryReleasedThisFrame(); 
-
         if (module == null)
         {
-
-            if (!releasedThisFrame)
-            {
-                if (Placer && Placer.IsActive) Placer.End();
-                Placer?.ReleaseExternalPointer();
-            }
+            if (Placer && Placer.IsActive) Placer.End();
+            Placer?.ReleaseExternalPointer();
             return;
         }
 
-        bool overUI = UIChecker.IsOverUI(pos);
-        bool inside3D = IsPointerInsideBuildVolume(pos);
-
-        if (!overUI && inside3D)
-        {
-            if (Placer && !Placer.IsActive) Placer.Begin(module);
-        }
-        else
+        if (UIChecker.IsOverUI(pos))
         {
             if (Placer && Placer.IsActive) Placer.End();
+            return;
         }
+
+        if (BuildVolume3D && !IsPointerInsideBuildVolume(pos))
+        {
+            if (Placer && Placer.IsActive) Placer.End();
+            return;
+        }
+
+        if (Placer && !Placer.IsActive) Placer.Begin(module);
     }
 
     bool IsPointerInsideBuildVolume(Vector2 screenPos)
@@ -57,7 +48,4 @@ public class WorldPlacementBridge : MonoBehaviour
 
     static Vector2 GetPointer() =>
         Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero;
-
-    static bool WasPrimaryReleasedThisFrame() =>
-        Mouse.current != null && Mouse.current.leftButton.wasReleasedThisFrame;
 }
