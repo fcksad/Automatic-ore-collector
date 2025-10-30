@@ -15,6 +15,12 @@ MonoBehaviour:
   m_GroupName: Localization-Locales
   m_GUID: b27cf53dfd01969498f1b20000996ed3
   m_SerializeEntries:
+  - m_GUID: 06b71e2998991ba44b8e9535202ad60a
+    m_Address: Swedish (sv)
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0841ca6e61d1b5c41a3eb20f4b4b2c24
     m_Address: Italian (it)
     m_ReadOnly: 1
@@ -29,6 +35,18 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 10bd779592582084fb43eabedd0ffff5
     m_Address: English (en)
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 23a3f44fb1bd0504d945eb4e7a00b03a
+    m_Address: Chinese (Simplified) (zh-Hans)
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 34d2c7b3aa13a064dad8147cabd24268
+    m_Address: Danish (da)
     m_ReadOnly: 1
     m_SerializedLabels:
     - Locale
@@ -87,6 +105,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - Locale
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9b7bef77f6fb21448a1d67c897ae4a82
+    m_Address: Dutch (nl)
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9bcbc7cc3a65dbb41b31e0f594c868c4
     m_Address: Czech (cs)
     m_ReadOnly: 1
@@ -117,8 +141,20 @@ MonoBehaviour:
     m_SerializedLabels:
     - Locale
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dc450522335eb4d48819794910cf1774
+    m_Address: "Norwegian Bokm\xE5l (nb)"
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: dd7f52e3e9a55b04c99c25de50f4f142
     m_Address: Japanese (ja)
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e76226080a97bdc43a745a8e3f95d9f7
+    m_Address: Finnish (fi)
     m_ReadOnly: 1
     m_SerializedLabels:
     - Locale

@@ -4340,9 +4340,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Cam: {fileID: 2147141476}
   MountRoot: {fileID: 2004575278}
-  SurfaceMask:
-    serializedVersion: 2
-    m_Bits: 11776
   ObstacleMask:
     serializedVersion: 2
     m_Bits: 3584
@@ -4353,7 +4350,7 @@ MonoBehaviour:
   BadMat: {fileID: 2100000, guid: 49a22ae5591b78549ad5d372ba31246d, type: 2}
   RaycastMask:
     serializedVersion: 2
-    m_Bits: 8192
+    m_Bits: 11776
   FallbackCell: 0.25
   AlignToHitObjectAxes: 1
   OverlapPadding: 0.01
@@ -4370,7 +4367,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Placer: {fileID: 407271480}
-  BuildVolume3D: {fileID: 1711714799}
+  BuildVolume: {fileID: 1711714799}
   WorldCamera: {fileID: 2147141476}
 --- !u!1001 &422676027
 PrefabInstance:
@@ -4810,14 +4807,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 369720820971915827, guid: 636b69886a69efe49a01933bb92dff8e, type: 3}
-      propertyPath: m_Layer
-      value: 9
-      objectReference: {fileID: 0}
-    - target: {fileID: 1297728061916962769, guid: 636b69886a69efe49a01933bb92dff8e, type: 3}
-      propertyPath: m_Layer
-      value: 9
-      objectReference: {fileID: 0}
     - target: {fileID: 1542544467796693176, guid: 636b69886a69efe49a01933bb92dff8e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -4861,26 +4850,6 @@ PrefabInstance:
     - target: {fileID: 2145740389987036217, guid: 636b69886a69efe49a01933bb92dff8e, type: 3}
       propertyPath: m_Name
       value: Cabin
-      objectReference: {fileID: 0}
-    - target: {fileID: 2145740389987036217, guid: 636b69886a69efe49a01933bb92dff8e, type: 3}
-      propertyPath: m_Layer
-      value: 9
-      objectReference: {fileID: 0}
-    - target: {fileID: 2457051086711879894, guid: 636b69886a69efe49a01933bb92dff8e, type: 3}
-      propertyPath: m_Layer
-      value: 9
-      objectReference: {fileID: 0}
-    - target: {fileID: 5480315190155484551, guid: 636b69886a69efe49a01933bb92dff8e, type: 3}
-      propertyPath: m_Layer
-      value: 9
-      objectReference: {fileID: 0}
-    - target: {fileID: 7476873801741346089, guid: 636b69886a69efe49a01933bb92dff8e, type: 3}
-      propertyPath: m_Layer
-      value: 9
-      objectReference: {fileID: 0}
-    - target: {fileID: 9197045165265616933, guid: 636b69886a69efe49a01933bb92dff8e, type: 3}
-      propertyPath: m_Layer
-      value: 9
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

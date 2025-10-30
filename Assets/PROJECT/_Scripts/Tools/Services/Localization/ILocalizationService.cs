@@ -15,4 +15,5 @@ public interface ILocalizationService
     string GetLocalizationString(LocalizationConfig config);
     void Subscribe(LocalizationConfig config, Action<string> onChanged, out Action unsubscribe);
     void BindTo(TMPro.TextMeshProUGUI label, LocalizationConfig config, MonoBehaviour owner);
+    void UnbindTo(TMPro.TextMeshProUGUI label, LocalizationConfig config, MonoBehaviour owner);
 }

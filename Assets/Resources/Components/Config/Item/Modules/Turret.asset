@@ -15,17 +15,9 @@ MonoBehaviour:
   <Id>k__BackingField: Turret
   <DisplayName>k__BackingField: Turret
   <Prefab>k__BackingField: {fileID: 7346464108501629971, guid: 27201d39af4b43c419394b9d498ccb0b, type: 3}
-  <PowerDraw>k__BackingField: 0
-  <PowerSupply>k__BackingField: 0
-  <Mass>k__BackingField: 0
-  <HP>k__BackingField: 0
-  <Armor>k__BackingField: 0
-  <CabinPower>k__BackingField: 0
-  <Cost>k__BackingField: 0
-  <Energy>k__BackingField: 0
+  RotationMode: 0
+  MountHeight: 0.1
+  BoundsSize: {x: 0.1, y: 0.1, z: 0.1}
   Footprint2D:
   - {x: 0, y: 0}
   RequiredOverlap: 1
-  MountHeight: 0.25
-  RotationMode: 0
-  BoundsSize: {x: 0.5, y: 0.5, z: 0.5}

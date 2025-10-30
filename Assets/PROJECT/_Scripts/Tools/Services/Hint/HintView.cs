@@ -59,6 +59,15 @@ namespace Service
             }
         }
 
+        public Sprite GetSprite(ControlDeviceType device, string controlButton)
+        {
+            if (_inputHintConfig == null || string.IsNullOrEmpty(controlButton))
+                return null;
+
+            var hint = _inputHintConfig.GetHint(device, controlButton);
+            return hint?.Icon;
+        }
+
         public void Hide(string localizationAction)
         {
             if (_hints.TryGetValue(localizationAction, out var hint))
@@ -90,15 +99,7 @@ namespace Service
         public void Toggle(bool value)
         {
             _hintHolder.gameObject.SetActive(value);
-            //StartCoroutine(RefreshLayoutNextFrame());
         }
-
-/*        private IEnumerator RefreshLayoutNextFrame()
-        {
-            yield return new WaitForEndOfFrame(); 
-            _horizontalLayoutGroup.enabled = false;
-            _horizontalLayoutGroup.enabled = true;
-        }*/
     }
 }
     

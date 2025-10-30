@@ -15,9 +15,9 @@ MonoBehaviour:
   <Id>k__BackingField: Cabine
   <DisplayName>k__BackingField: Cabine
   <Prefab>k__BackingField: {fileID: 2145740389987036217, guid: 636b69886a69efe49a01933bb92dff8e, type: 3}
-  RotationMode: 0
-  Footprint2D:
-  - {x: 2, y: 2}
-  RequiredOverlap: 1
-  MountHeight: 1
+  RotationMode: 2
+  MountHeight: 0.5
   BoundsSize: {x: 1, y: 1, z: 1}
+  Footprint2D:
+  - {x: 0, y: 0}
+  RequiredOverlap: 1

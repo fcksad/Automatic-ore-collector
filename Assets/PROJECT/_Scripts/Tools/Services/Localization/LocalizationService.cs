@@ -12,6 +12,7 @@ namespace Localization
     public class LocalizationService : ILocalizationService, IInitializable, Service.IDisposable
     {
         public event Action OnLanguageChangedEvent;
+        private readonly Dictionary<TextMeshProUGUI, Action> _bindings = new();
 
         private ISaveService _saveService;
 
@@ -27,6 +28,10 @@ namespace Localization
 
         public void Dispose()
         {
+            foreach (var kvp in _bindings)
+                kvp.Value?.Invoke();
+            _bindings.Clear();
+
             OnLanguageChangedEvent = null;
         }
 
@@ -97,6 +102,16 @@ namespace Localization
                 owner.StartCoroutine(WaitForDestroy(owner, Cleanup));
             }
         }
+
+        public void UnbindTo(TextMeshProUGUI label, LocalizationConfig config, MonoBehaviour owner)
+        {
+            if (_bindings.TryGetValue(label, out var unsubscribe))
+            {
+                unsubscribe?.Invoke();
+                _bindings.Remove(label);
+            }
+        }
+
 
         private System.Collections.IEnumerator WaitForDestroy(MonoBehaviour owner, Action onDestroyed)
         {

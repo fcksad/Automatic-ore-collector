@@ -9,44 +9,38 @@ namespace Builder
         [Header("World")]
         public Camera Cam;
         public Transform MountRoot;
-        public LayerMask SurfaceMask;        // слои объектов, в которых МОЖЕТ быть ConnectorSurface
-        public LayerMask ObstacleMask;       // слои уже размещённых модулей/рамы
+        public LayerMask ObstacleMask;       
         public LayerMask GhostLayer;
 
         [Header("Ghost")]
-        public Material OkMat, BadMat;
+        public Material OkMat;
+        public Material BadMat;
 
         [Header("Raycast")]
         public LayerMask RaycastMask;
 
         [Header("Fallback (no ConnectorSurface)")]
-        public float FallbackCell = 0.25f;       // шаг снэпа на обычных поверхностях
-        public bool AlignToHitObjectAxes = true; // базис u/v брать из transform цели
+        public float FallbackCell = 0.25f;       
+        public bool AlignToHitObjectAxes = true; 
 
         [Header("Overlap")]
         public float OverlapPadding = 0.01f;
 
-        // runtime
         private ModuleConfig _mod;
         private GameObject _ghost;
         private Renderer[] _rends;
         private BoxCollider _ghostBox;
         private Quaternion _yaw = Quaternion.identity;
-        private ConnectorSurface _surface; // последняя поверхность с сеткой (для fallback)
+        private ConnectorSurface _surface; 
 
-        // auto-consume from inventory
         private Inventory.IInventoryModel _model;
         private int _fromIndex;
 
-        // external pointer (из WorldPlacementBridge)
         private bool _useExternalPointer;
         private Vector2 _externalPointer;
 
         public bool IsActive => _mod != null && _ghost != null;
 
-        void Awake() { if (!Cam) Cam = Camera.main; }
-
-        // ===== API =====
         public void Begin(ModuleConfig mod)
         {
             _mod = mod;
@@ -88,104 +82,133 @@ namespace Builder
 
         void Update()
         {
-            // активация от DragContext
             var item = Inventory.DragContext.Item;
             if (_mod == null && item?.Config?.Module) Begin(item.Config.Module);
             if (_mod == null) { if (_ghost) End(); return; }
 
             var ray = Cam.ScreenPointToRay(GetPointer());
 
-            // есть хит о ЛЮБОЙ коллайдер
-            if (Physics.Raycast(ray, out var hit, 9999f, RaycastMask, QueryTriggerInteraction.Ignore))
+            var hits = Physics.RaycastAll(ray, 9999f, RaycastMask, QueryTriggerInteraction.Collide);
+            System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+            // 1) ищем ближайший хит с ConnectorSurface
+            RaycastHit? csHit = null;
+            ConnectorSurface s = null;
+            foreach (var h in hits)
             {
-                var s = hit.collider.GetComponentInParent<ConnectorSurface>();
-                ApplyYawByMode(_mod);
+                var cand = h.collider.GetComponentInParent<ConnectorSurface>();
+                if (cand != null) { csHit = h; s = cand; break; }
+            }
 
+            ApplyYawByMode(_mod);
 
-                // ConnectorSurface режим
-                if (s != null)
+            if (csHit.HasValue)
+            {
+                var h = csHit.Value;
+                _surface = s;
+                if (!_surface.WorldToCell(h.point, out var snappedCell)) { SetMat(BadMat); return; }
+
+                var cellPos = _surface.CellToWorld(snappedCell);
+                var n = _surface.transform.up;
+                var rot = _yaw;
+
+                const float skin = 0.001f;
+                float rise = HalfExtentAlong(n, rot, _ghostBox.size);
+                var pos = cellPos + n * (rise + skin);
+                _ghost.transform.SetPositionAndRotation(pos, rot);
+
+                // footprint + проверка занятости/резерва
+                var fp = GetFootprintOrDefault(_mod);
+                var cells2D = new List<Vector2Int>(TransformFootprint(fp, snappedCell, _yaw));
+
+                bool okGrid = _surface.CanPlace(cells2D); // и enabled, и не reserved
+                                                          // физика: игнорируем опорный коллайдер
+                var center = _ghost.transform.TransformPoint(_ghostBox.center);
+                var half = _ghostBox.size * 0.5f + Vector3.one * OverlapPadding;
+                var rotQ = rot;
+
+                var buf = new Collider[16];
+                int cnt = Physics.OverlapBoxNonAlloc(center, half, buf, rotQ, ObstacleMask, QueryTriggerInteraction.Collide);
+                bool phys = false;
+                for (int i = 0; i < cnt; i++)
+                    if (buf[i] && buf[i] != h.collider && buf[i].transform != _ghost.transform) { phys = true; break; }
+
+                bool final = okGrid && !phys;
+                SetMat(final ? OkMat : BadMat);
+
+                if (Mouse.current?.leftButton.wasReleasedThisFrame == true && final)
                 {
-                    // режим коннекторов
-                    _surface = s;
-                    if (!_surface.WorldToCell(hit.point, out var snappedCell)) { SetMat(BadMat); return; }
-                    var pos = _surface.CellToWorld(snappedCell) + Vector3.up * _mod.MountHeight;
-                    _ghost.transform.SetPositionAndRotation(pos, _yaw);
-                    ValidateAndMaybeCommit(snappedCell, true);
-                    return;
+                    var real = Instantiate(_mod.Prefab, _ghost.transform.position, _ghost.transform.rotation, MountRoot);
+                    foreach (var c in real.GetComponentsInChildren<Collider>(true)) c.enabled = true;
+
+                    _surface.Reserve(cells2D); // ← тут зарезервируются клетки и «посереют»
+                    var occ = real.AddComponent<ConnectorOccupant>();
+                    occ.Init(_surface, cells2D);
+
+                    _model?.TryRemoveAt(_fromIndex, 1);
+                    End();
                 }
-                else
-                {
-                    // fallback-плоскость (пол или любая грань без ConnectorSurface)  // (оставь твою логику SnapPointOnPlane — она ок)
-                }
-
-
-
-                // Обычная поверхность (магнит к плоскости с шагом FallbackCell)
-                var n = hit.normal.normalized;
-                var (u, v) = BuildPlaneBasis(hit.collider.transform, n, AlignToHitObjectAxes);
-                var snapped = SnapPointOnPlane(hit.point, hit.point, u, v, FallbackCell);
-                var pos2 = snapped + n * _mod.MountHeight;
+            }
+            else
+            {
+                // не нашли ConnectorSurface → fallback (пол/стена)
+                var h = hits.Length > 0 ? hits[0] : default;
+                var n = h.normal.normalized;
+                var (u, v) = BuildPlaneBasis(h.collider ? h.collider.transform : null, n, AlignToHitObjectAxes);
+                var planeOrigin = h.collider ? ProjectPointOnPlane(h.collider.transform.position, h.point, n) : h.point;
+                var snapped = SnapPointOnPlane(h.point, planeOrigin, u, v, FallbackCell);
 
                 var baseRot = Quaternion.LookRotation(u, n);
                 var yawAround = Quaternion.AngleAxis(_yaw.eulerAngles.y, n);
                 var rot2 = yawAround * baseRot;
 
+                const float skin2 = 0.001f;
+                float rise2 = HalfExtentAlong(n, rot2, _ghostBox.size);
+                var pos2 = snapped + n * (rise2 + skin2);
                 _ghost.transform.SetPositionAndRotation(pos2, rot2);
 
-                var center = _ghost.transform.TransformPoint(_ghostBox.center);
-                var half = _ghostBox.size * 0.5f + Vector3.one * OverlapPadding;
-                bool phys = Physics.CheckBox(center, half, rot2, ObstacleMask, QueryTriggerInteraction.Ignore);
-                SetMat(!phys ? OkMat : BadMat);
+                // физика для fallback
+                var center2 = _ghost.transform.TransformPoint(_ghostBox.center);
+                var half2 = _ghostBox.size * 0.5f + Vector3.one * OverlapPadding;
+                var buf2 = new Collider[16];
+                int cnt2 = Physics.OverlapBoxNonAlloc(center2, half2, buf2, rot2, ObstacleMask, QueryTriggerInteraction.Collide);
+                bool phys2 = false;
+                for (int i = 0; i < cnt2; i++)
+                    if (buf2[i] && buf2[i].transform != _ghost.transform) { phys2 = true; break; }
 
-                if (Mouse.current != null && Mouse.current.leftButton.wasReleasedThisFrame && !phys)
+                SetMat(!phys2 ? OkMat : BadMat);
+
+                if (Mouse.current?.leftButton.wasReleasedThisFrame == true && !phys2)
                 {
                     var real = Instantiate(_mod.Prefab, _ghost.transform.position, _ghost.transform.rotation, MountRoot);
                     foreach (var c in real.GetComponentsInChildren<Collider>(true)) c.enabled = true;
                     _model?.TryRemoveAt(_fromIndex, 1);
                     End();
                 }
-                return;
             }
-
-            // никуда не попали — если есть запомнённая _surface, проектируем на её плоскость
-            if (_surface == null) { SetMat(BadMat); return; }
-            if (!RayToSurfacePlane(_surface, ray, out var planePoint)) { SetMat(BadMat); return; }
-
-            ApplyYawByMode(_mod);
-            var fallbackCell = SnapWorldToCell(_surface, planePoint);
-            var fallbackInside = fallbackCell.x >= 0 && fallbackCell.x < _surface.width &&
-                                 fallbackCell.y >= 0 && fallbackCell.y < _surface.height;
-
-            var posFallback = _surface.CellToWorld(fallbackCell) + Vector3.up * _mod.MountHeight;
-            _ghost.transform.SetPositionAndRotation(posFallback, _yaw);
-            ValidateAndMaybeCommit(fallbackCell, fallbackInside);
         }
 
-        // ===== validation & commit for ConnectorSurface =====
-        void ValidateAndMaybeCommit(Vector2Int cell, bool cellInside)
+            static float HalfExtentAlong(Vector3 n, Quaternion rot, Vector3 size)
         {
-            var cells2D = TransformFootprint(_mod.Footprint2D, cell, _yaw);
-            int overlap = cellInside ? _surface.OverlapCount(cells2D) : 0;
-            bool okByConnectors = overlap >= Mathf.Max(1, _mod.RequiredOverlap);
+            // локальные полуоси (в world)
+            Vector3 rx = rot * Vector3.right;
+            Vector3 ry = rot * Vector3.up;
+            Vector3 rz = rot * Vector3.forward;
 
-            var center = _ghost.transform.TransformPoint(_ghostBox.center);
-            var half = _ghostBox.size * 0.5f + Vector3.one * OverlapPadding;
-            bool phys = Physics.CheckBox(center, half, _yaw, ObstacleMask, QueryTriggerInteraction.Ignore);
+            float hx = Mathf.Abs(Vector3.Dot(n, rx)) * (size.x * 0.5f);
+            float hy = Mathf.Abs(Vector3.Dot(n, ry)) * (size.y * 0.5f);
+            float hz = Mathf.Abs(Vector3.Dot(n, rz)) * (size.z * 0.5f);
 
-            bool final = okByConnectors && !phys;
-            SetMat(final ? OkMat : BadMat);
-
-            if (Mouse.current != null && Mouse.current.leftButton.wasReleasedThisFrame && final)
-            {
-                var real = Instantiate(_mod.Prefab, _ghost.transform.position, _ghost.transform.rotation, MountRoot);
-                foreach (var c in real.GetComponentsInChildren<Collider>(true)) c.enabled = true;
-
-                _model?.TryRemoveAt(_fromIndex, 1);
-                End();
-            }
+            return hx + hy + hz;
         }
 
-        // ===== helpers =====
+        static Vector2Int[] GetFootprintOrDefault(ModuleConfig m)
+        {
+            return (m.Footprint2D != null && m.Footprint2D.Length > 0)
+                ? m.Footprint2D
+                : new[] { Vector2Int.zero }; // 1×1
+        }
+
         static IEnumerable<Vector2Int> TransformFootprint(Vector2Int[] src, Vector2Int origin, Quaternion yaw)
         {
             if (src == null || src.Length == 0) yield break;
@@ -201,6 +224,13 @@ namespace Builder
                 }
                 yield return origin + r;
             }
+        }
+
+        static Vector3 ProjectPointOnPlane(Vector3 point, Vector3 anyPointOnPlane, Vector3 planeNormal)
+        {
+            var toPoint = point - anyPointOnPlane;
+            var dist = Vector3.Dot(toPoint, planeNormal);
+            return point - planeNormal * dist;
         }
 
         static (Vector3 u, Vector3 v) BuildPlaneBasis(Transform target, Vector3 n, bool alignToObjectAxes)

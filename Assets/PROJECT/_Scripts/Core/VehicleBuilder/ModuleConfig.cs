@@ -11,20 +11,18 @@ namespace Builder
         [field: SerializeField] public string DisplayName { get; private set; }
         [field: SerializeField] public GameObject Prefab { get; private set; }
 
-        [Header("Placement")]
+        [Header("Rotateion")]
         public RotationMode RotationMode = RotationMode.Snap90;
 
-        [Tooltip("Локальный footprint в клетках X/Z (для коннекторных поверхностей).")]
-        public Vector2Int[] Footprint2D;
+        [Header("HightOffset")]
+        public float MountHeight = 0.5f;
 
-        [Tooltip("Как минимум столько клеток должно попасть в разрешённые на поверхности.")]
+        [Tooltip("Box Checker")]
+        public Vector3 BoundsSize = new Vector3(1f, 1f, 1f);
+        [Tooltip("Клетки модуля в локальных координатах сетки (X/Z). Если пусто — 1 клетка (0,0).")]
+        public Vector2Int[] Footprint2D = new Vector2Int[] { Vector2Int.zero };
+        [Tooltip("Минимум совпадающих разрешённых клеток поверхности")]
         public int RequiredOverlap = 1;
-
-        [Tooltip("Насколько приподнимать модуль от поверхности (толщина «подошвы», метры).")]
-        public float MountHeight = 0.01f;
-
-        [Tooltip("Если у префаба нет коллайдеров — габариты для overlap-проверки.")]
-        public Vector3 BoundsSize = new Vector3(0.5f, 0.5f, 0.5f);
 
     }
 }

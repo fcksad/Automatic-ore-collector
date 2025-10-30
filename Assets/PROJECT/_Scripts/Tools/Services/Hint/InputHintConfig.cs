@@ -26,6 +26,10 @@ public class InputHintConfig : ScriptableObject
     [SerializeField] private List<InputHintEntry> _hintEntries = new();
     private Dictionary<(ControlDeviceType, string), HintInputView> _hintDictionary;
 
+    [Header("PlayStation: Options icons")]
+    [SerializeField] private Sprite _ps4OptionsIcon;
+    [SerializeField] private Sprite _ps5OptionsIcon;
+
     public void Initialize()
     {
         _hintDictionary = new();
@@ -69,7 +73,6 @@ public class InputHintConfig : ScriptableObject
     [ContextMenu("Auto Fill All Common Hints")]
     private void AutoFillDefaults()
     {
-
         AutoFillKeyboard();
         AutoFillGamepadGeneric();
         AutoFillPlayStation();
@@ -260,8 +263,8 @@ public class InputHintConfig : ScriptableObject
 
     private void AutoFillSwitch()
     {
-        AddBtn(ControlDeviceType.NintendoSwitch, "A", "a", null, "buttoneast", "buttonsouth");
-        AddBtn(ControlDeviceType.NintendoSwitch, "B", "b", null, "buttonsouth", "buttoneast");
+        AddBtn(ControlDeviceType.NintendoSwitch, "A", "a", null, "buttoneast"); // у Nintendo A справа
+        AddBtn(ControlDeviceType.NintendoSwitch, "B", "b", null, "buttonsouth");
         AddBtn(ControlDeviceType.NintendoSwitch, "X", "buttonnorth", null, "buttonnorth");
         AddBtn(ControlDeviceType.NintendoSwitch, "Y", "buttonwest", null, "buttonwest");
         AddBtn(ControlDeviceType.NintendoSwitch, "L", "l", null, "leftshoulder");
@@ -285,4 +288,28 @@ public class InputHintConfig : ScriptableObject
         AddBtn(ControlDeviceType.NintendoSwitch, "D-Right", "right");
     }
 #endif
+
+
+    private void ApplyPlatformOptionsIcon()
+    {
+
+        var view = GetHint(ControlDeviceType.PlayStation, "options");
+        if (view == null) return;
+
+
+#if UNITY_PS5
+        if (_ps5OptionsIcon != null)
+            view.Icon = _ps5OptionsIcon;
+#else
+
+#if UNITY_PS4
+        if (_ps4OptionsIcon != null)
+            view.Icon = _ps4OptionsIcon;
+#else
+
+        if (_ps5OptionsIcon != null)
+            view.Icon = _ps5OptionsIcon;
+#endif
+#endif
+    }
 }

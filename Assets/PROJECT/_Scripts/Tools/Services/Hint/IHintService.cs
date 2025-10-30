@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Service
 {
@@ -8,6 +9,7 @@ namespace Service
         void HideHint(string localizationAction);
         void HideAll();
         void ToggleView(bool value);
+        Sprite GetHintSprite(CharacterAction action);
 
     }
 }

@@ -15,7 +15,7 @@ MonoBehaviour:
   m_DefaultGroup: 87239ea5f97e17646a6acded5a8c75b9
   m_currentHash:
     serializedVersion: 2
-    Hash: a2b743957f297219cedff4ad04d6251b
+    Hash: 00000000000000000000000000000000
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 0
   m_CatalogRequestsTimeout: 0
@@ -59,6 +59,9 @@ MonoBehaviour:
   m_BuildAddressablesWithPlayerBuild: 0
   m_overridePlayerVersion: '[UnityEditor.PlayerSettings.bundleVersion]'
   m_GroupAssets:
+  - {fileID: 11400000, guid: 9bcfb933bc2172a4597818a2ac969edc, type: 2}
+  - {fileID: 11400000, guid: bae7de962d7942f408d6d2cd298fdc70, type: 2}
+  - {fileID: 11400000, guid: f20e5dad381172c42a4f4b2cab517b87, type: 2}
   - {fileID: 11400000, guid: f3698dfcde2187144ab60a781ce4b88b, type: 2}
   - {fileID: 11400000, guid: 3443f1277a6f8f149b4c7a37055e9990, type: 2}
   - {fileID: 11400000, guid: 67ae18e480c4dde4db5125fe6d5d232b, type: 2}
@@ -73,14 +76,17 @@ MonoBehaviour:
   - {fileID: 11400000, guid: bfd12ccf87f570149b6c9ce2a7be0f70, type: 2}
   - {fileID: 11400000, guid: 68a06eae36ff40a4082216b3e89124a2, type: 2}
   - {fileID: 11400000, guid: 986d73fdce8eef742bff9f10d8f87b22, type: 2}
+  - {fileID: 11400000, guid: 5dae84eb79f4b514c82dc7c200692ff7, type: 2}
   - {fileID: 11400000, guid: c888097e9add2f746a3517833c6e2dca, type: 2}
   - {fileID: 11400000, guid: 653a4623cb65fb3439af6b7ff8834421, type: 2}
   - {fileID: 11400000, guid: 58de4e14cdebd1c4788dd3e7bb19d50a, type: 2}
   - {fileID: 11400000, guid: 9604934a40d12a04794d9f1a4a831f28, type: 2}
   - {fileID: 11400000, guid: 0e245740100cbf2458b3ef7455197799, type: 2}
+  - {fileID: 11400000, guid: f90e6f3a8a2b2a14686729c09b929f25, type: 2}
   - {fileID: 11400000, guid: e4a4b6adade95a54ba10fa5175a32f41, type: 2}
   - {fileID: 11400000, guid: d65b90629c15dc14f9e8d9161892cc92, type: 2}
   - {fileID: 11400000, guid: 89cadb9577941184a9a30ad888a876a6, type: 2}
+  - {fileID: 11400000, guid: 43708601cf12f214482161fd03c8622e, type: 2}
   m_BuildSettings:
     m_LogResourceManagerExceptions: 1
     m_BundleBuildPath: Temp/com.unity.addressables/AssetBundles
@@ -140,6 +146,12 @@ MonoBehaviour:
     - Locale-cs
     - Locale-ko
     - Locale-hu
+    - Locale-zh-Hans
+    - Locale-da
+    - Locale-nl
+    - Locale-fi
+    - Locale-nb
+    - Locale-sv
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: cbbfc67e2e5e90847b0a3c2e4fbc9004, type: 2}

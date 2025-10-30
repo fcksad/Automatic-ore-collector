@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.DualShock;
 using UnityEngine.InputSystem.Switch;
@@ -124,6 +125,21 @@ namespace Service
         public void ToggleView(bool value)
         {
             _hintView.Toggle(value);
+        }
+
+        public Sprite GetHintSprite(CharacterAction action)
+        {
+            if (_hintView == null || _inputService == null || _playerInput == null)
+                return null;
+
+            var scheme = _playerInput.currentControlScheme;
+            var device = GetDeviceType(scheme);
+
+            string controlButton = _inputService.GetActionKey(action, scheme);
+            if (string.IsNullOrEmpty(controlButton))
+                return null;
+            var spr = _hintView.GetSprite(device, controlButton);
+            return spr;
         }
     }
 }
