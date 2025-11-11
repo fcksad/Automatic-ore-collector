@@ -12,15 +12,15 @@ public class WorldPlacementBridge : MonoBehaviour
     private void Update()
     {
         var item = Inventory.DragContext.Item;
+
         var module = item?.Config?.Module;
 
         var pos = GetPointer();
-        Placer?.SetExternalPointer(pos);
 
         if (module == null)
         {
             if (Placer && Placer.IsActive) Placer.End();
-            Placer?.ReleaseExternalPointer();
+
             return;
         }
 
@@ -30,11 +30,12 @@ public class WorldPlacementBridge : MonoBehaviour
             return;
         }
 
-        if (BuildVolume && !IsPointerInsideBuildVolume(pos))
+/*        if (BuildVolume && !IsPointerInsideBuildVolume(pos))
         {
             if (Placer && Placer.IsActive) Placer.End();
             return;
-        }
+        }*/
+
 
         if (Placer && !Placer.IsActive) Placer.Begin(module);
     }

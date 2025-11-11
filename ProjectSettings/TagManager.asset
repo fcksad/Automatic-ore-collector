@@ -17,11 +17,11 @@ TagManager:
   - Vehicle
   - Turrets
   - Wheel
-  - 
-  - BuildGround
-  - ObstacleMask
+  - Connector
   - BuildZone
-  - Ghost
+  - 
+  - 
+  - 
   - 
   - 
   - 

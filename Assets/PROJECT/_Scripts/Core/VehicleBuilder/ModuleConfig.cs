@@ -1,8 +1,16 @@
 ﻿using UnityEngine;
+
 namespace Builder
 {
-
     public enum RotationMode { Any, YawOnly, Snap90 }
+
+    [System.Serializable]
+    public class ModuleOccupancyMask
+    {
+        [Tooltip("Клетки, которые занимает модуль в ЛОКАЛЬНЫХ координатах грид-а. Для простого 1x1x1 блока достаточно (0,0,0).")]
+        public Vector3Int[] LocalCells = { Vector3Int.zero };
+    }
+
 
     [CreateAssetMenu(fileName = "Module", menuName = "Configs/Vehicle/Module")]
     public class ModuleConfig : ScriptableObject
@@ -11,18 +19,14 @@ namespace Builder
         [field: SerializeField] public string DisplayName { get; private set; }
         [field: SerializeField] public GameObject Prefab { get; private set; }
 
-        [Header("Rotateion")]
+        [Header("Поворот")]
         public RotationMode RotationMode = RotationMode.Snap90;
 
-        [Header("HightOffset")]
-        public float MountHeight = 0.5f;
+        [Header("Грид")]
+        public float CellSize = 0.25f;        
+        public Vector3Int GridSize = Vector3Int.one; // сколько клеток примерно занимает блок (пока просто для инфы)
 
-        [Tooltip("Box Checker")]
-        public Vector3 BoundsSize = new Vector3(1f, 1f, 1f);
-        [Tooltip("Клетки модуля в локальных координатах сетки (X/Z). Если пусто — 1 клетка (0,0).")]
-        public Vector2Int[] Footprint2D = new Vector2Int[] { Vector2Int.zero };
-        [Tooltip("Минимум совпадающих разрешённых клеток поверхности")]
-        public int RequiredOverlap = 1;
-
+        [Header("Занятые клетки")]
+        public ModuleOccupancyMask Occupancy = new ModuleOccupancyMask();
     }
 }

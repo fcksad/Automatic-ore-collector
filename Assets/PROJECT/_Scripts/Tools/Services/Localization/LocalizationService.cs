@@ -95,12 +95,10 @@ namespace Localization
         {
             Subscribe(config, value => label.text = value, out var unsubscribe);
 
-            if (owner != null)
-            {
-                void Cleanup() => unsubscribe?.Invoke();
+            _bindings[label] = unsubscribe;
 
-                owner.StartCoroutine(WaitForDestroy(owner, Cleanup));
-            }
+            if (owner != null)
+                owner.StartCoroutine(WaitForDestroy(owner, label, unsubscribe));
         }
 
         public void UnbindTo(TextMeshProUGUI label, LocalizationConfig config, MonoBehaviour owner)
@@ -113,9 +111,9 @@ namespace Localization
         }
 
 
-        private System.Collections.IEnumerator WaitForDestroy(MonoBehaviour owner, Action onDestroyed)
+        private System.Collections.IEnumerator WaitForDestroy(MonoBehaviour owner, TextMeshProUGUI label, Action onDestroyed)
         {
-            while (owner != null)
+            while (owner && label)
                 yield return null;
 
             onDestroyed?.Invoke();
