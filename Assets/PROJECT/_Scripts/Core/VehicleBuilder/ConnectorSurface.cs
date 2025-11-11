@@ -27,6 +27,9 @@ public class ConnectorSurface : MonoBehaviour
     [Header("Направление грани")]
     public FaceDirection Direction = FaceDirection.Up;
 
+    [Header("Слой")]
+    public LayerMask _connectorLayer;
+
     [Header("Авто-настройка")]
     [Tooltip("Автоматически ставить коннектор на грань BoxCollider родителя.")]
     public bool AutoAlignToParent = true;
@@ -77,6 +80,11 @@ public class ConnectorSurface : MonoBehaviour
             name = Direction.ToString();
         }
 
+        if (gameObject.layer != _connectorLayer)
+        {
+            gameObject.layer = _connectorLayer;
+        }
+
         if (AutoAlignToParent)
             AlignToParentCollider();
 
@@ -117,7 +125,6 @@ public class ConnectorSurface : MonoBehaviour
         else if (dir.z > 0.5f) localPos += new Vector3(0, 0, +half.z);
         else localPos += new Vector3(0, 0, -half.z);
 
-        // ставим child прямо на грань
         transform.localPosition = localPos;
         transform.localRotation = Quaternion.identity;
     }
@@ -127,7 +134,6 @@ public class ConnectorSurface : MonoBehaviour
         var baseCol = GetParentCollider();
         if (!baseCol) return;
 
-        // свой триггер-коллайдер на объекте коннектора
         if (_faceCollider == null)
         {
             var all = GetComponents<BoxCollider>();
@@ -146,7 +152,6 @@ public class ConnectorSurface : MonoBehaviour
 
         _faceCollider.isTrigger = true;
 
-        // Размер плиты берём по размеру родительского коллайдера
         var size = baseCol.size;
         var dir = DirectionVectors[(int)Direction];
 
@@ -155,7 +160,6 @@ public class ConnectorSurface : MonoBehaviour
 
         if (dir == Vector3.up || dir == Vector3.down)
         {
-            // плита горизонтальная, утоплена внутрь по Y
             center = new Vector3(0, dir.y * -FaceThickness * 0.5f, 0);
             faceSize = new Vector3(size.x, FaceThickness, size.z);
         }

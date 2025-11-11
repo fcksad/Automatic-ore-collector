@@ -4852,6 +4852,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConnectorSurface
   Type: 0
   Direction: 2
+  _connectorLayer:
+    serializedVersion: 2
+    m_Bits: 4096
   AutoAlignToParent: 1
   AutoCollider: 1
   FaceThickness: 0.01
@@ -5239,6 +5242,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConnectorSurface
   Type: 0
   Direction: 1
+  _connectorLayer:
+    serializedVersion: 2
+    m_Bits: 4096
   AutoAlignToParent: 1
   AutoCollider: 1
   FaceThickness: 0.01
@@ -6058,6 +6064,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConnectorSurface
   Type: 0
   Direction: 4
+  _connectorLayer:
+    serializedVersion: 2
+    m_Bits: 4096
   AutoAlignToParent: 1
   AutoCollider: 1
   FaceThickness: 0.01
@@ -9645,6 +9654,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConnectorSurface
   Type: 0
   Direction: 3
+  _connectorLayer:
+    serializedVersion: 2
+    m_Bits: 4096
   AutoAlignToParent: 1
   AutoCollider: 1
   FaceThickness: 0.01
@@ -11379,6 +11391,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConnectorSurface
   Type: 0
   Direction: 5
+  _connectorLayer:
+    serializedVersion: 2
+    m_Bits: 4096
   AutoAlignToParent: 1
   AutoCollider: 1
   FaceThickness: 0.01
@@ -14758,6 +14773,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConnectorSurface
   Type: 0
   Direction: 0
+  _connectorLayer:
+    serializedVersion: 2
+    m_Bits: 4096
   AutoAlignToParent: 1
   AutoCollider: 1
   FaceThickness: 0.01
@@ -14812,7 +14830,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1542544467853613457}
   m_Father: {fileID: 407271479}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2040019021
@@ -19952,7 +19971,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 2004575278}
     m_Modifications:
     - target: {fileID: 1420473151310774883, guid: 037e1631d37ada043ad2702b40008e19, type: 3}
       propertyPath: m_LocalPosition.x
@@ -19960,7 +19979,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1420473151310774883, guid: 037e1631d37ada043ad2702b40008e19, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.25
+      value: 1.125
       objectReference: {fileID: 0}
     - target: {fileID: 1420473151310774883, guid: 037e1631d37ada043ad2702b40008e19, type: 3}
       propertyPath: m_LocalPosition.z
@@ -19972,15 +19991,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1420473151310774883, guid: 037e1631d37ada043ad2702b40008e19, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 1420473151310774883, guid: 037e1631d37ada043ad2702b40008e19, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 1420473151310774883, guid: 037e1631d37ada043ad2702b40008e19, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 1420473151310774883, guid: 037e1631d37ada043ad2702b40008e19, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -20040,4 +20059,3 @@ SceneRoots:
   - {fileID: 2040019023}
   - {fileID: 407271479}
   - {fileID: 2094201099}
-  - {fileID: 8730160084324557553}

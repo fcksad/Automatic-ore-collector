@@ -12,40 +12,47 @@ public class WorldPlacementBridge : MonoBehaviour
     private void Update()
     {
         var item = Inventory.DragContext.Item;
-
         var module = item?.Config?.Module;
 
         var pos = GetPointer();
 
         if (module == null)
         {
-            if (Placer && Placer.IsActive) Placer.End();
+            if (Placer && Placer.IsActive)
+            {
+                bool overUI = UIChecker.IsOverUI(pos);
+                //bool insideVolume = !BuildVolume /*|| IsPointerInsideBuildVolume(pos)*/;
+
+                Placer.End(commit: !overUI /*&& insideVolume*/);
+            }
 
             return;
         }
 
         if (UIChecker.IsOverUI(pos))
         {
-            if (Placer && Placer.IsActive) Placer.End();
+            if (Placer && Placer.IsActive)
+                Placer.End(false); 
             return;
         }
 
 /*        if (BuildVolume && !IsPointerInsideBuildVolume(pos))
         {
-            if (Placer && Placer.IsActive) Placer.End();
+            if (Placer && Placer.IsActive)
+                Placer.End(false); 
             return;
         }*/
 
-
-        if (Placer && !Placer.IsActive) Placer.Begin(module);
+        if (Placer && !Placer.IsActive)
+            Placer.Begin(module);
     }
 
-    private bool IsPointerInsideBuildVolume(Vector2 screenPos)
+/*    private bool IsPointerInsideBuildVolume(Vector2 screenPos)
     {
         if (!BuildVolume) return true;
         var ray = (WorldCamera ? WorldCamera : Camera.main).ScreenPointToRay(screenPos);
         return BuildVolume.Raycast(ray, out _, 10000f);
-    }
+    }*/
 
     private Vector2 GetPointer() => Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero;
 }
