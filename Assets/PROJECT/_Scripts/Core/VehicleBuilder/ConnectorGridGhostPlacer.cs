@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static UnityEditor.Progress;
 
 namespace Builder
 {
@@ -28,6 +29,7 @@ namespace Builder
         private GameObject _ghost;
 
         private Inventory.IInventoryModel _model;
+        private Inventory.IInventoryItem _item;
         private int _fromIndex;
         public bool IsActive => _mod != null && _ghost != null;
 
@@ -61,6 +63,7 @@ namespace Builder
             SetGhostMaterial(BadMat);
 
             _model = Inventory.DragContext.Model;
+            _item = Inventory.DragContext.Item;
             _fromIndex = Inventory.DragContext.FromIndex;
 
             _currentCells.Clear();
@@ -78,6 +81,17 @@ namespace Builder
                 if (GridState != null && _currentCells != null && _currentCells.Count > 0)
                 {
                     GridState.Commit(_mod, real.transform, _currentCells);
+                }
+
+                var rt = real.AddComponent<Builder.BuildModuleRuntime>();
+                rt.GridState = GridState;
+                if (_currentCells != null && _currentCells.Count > 0)
+                    rt.OccupiedCells.AddRange(_currentCells);
+
+                var invItem = _item;
+                if (invItem != null)
+                {
+                    rt.SourceConfig = invItem.Config;
                 }
 
                 if (_model != null && _fromIndex >= 0)

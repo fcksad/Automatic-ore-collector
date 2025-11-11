@@ -4313,6 +4313,7 @@ GameObject:
   - component: {fileID: 407271479}
   - component: {fileID: 407271480}
   - component: {fileID: 407271481}
+  - component: {fileID: 407271482}
   m_Layer: 0
   m_Name: VEHICLE BUILDER
   m_TagString: Untagged
@@ -4357,7 +4358,7 @@ MonoBehaviour:
   BadMat: {fileID: 2100000, guid: 49a22ae5591b78549ad5d372ba31246d, type: 2}
   RaycastMask:
     serializedVersion: 2
-    m_Bits: 4160
+    m_Bits: 4096
   RotateKey: 32
   GridState: {fileID: 7774565345784231175}
 --- !u!114 &407271481
@@ -4375,6 +4376,24 @@ MonoBehaviour:
   Placer: {fileID: 407271480}
   BuildVolume: {fileID: 1711714799}
   WorldCamera: {fileID: 2147141476}
+--- !u!114 &407271482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 407271477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6216c342c2c2fd498b343332b51cadf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WorldToInventoryPickup
+  Cam: {fileID: 2147141476}
+  ModuleMask:
+    serializedVersion: 2
+    m_Bits: 3584
+  GridState: {fileID: 7774565345784231175}
+  InventoryController: {fileID: 849159703}
 --- !u!1001 &422676027
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4852,9 +4871,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConnectorSurface
   Type: 0
   Direction: 2
-  _connectorLayer:
-    serializedVersion: 2
-    m_Bits: 4096
+  _connectorLayerName: Connector
   AutoAlignToParent: 1
   AutoCollider: 1
   FaceThickness: 0.01
@@ -5242,9 +5259,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConnectorSurface
   Type: 0
   Direction: 1
-  _connectorLayer:
-    serializedVersion: 2
-    m_Bits: 4096
+  _connectorLayerName: Connector
   AutoAlignToParent: 1
   AutoCollider: 1
   FaceThickness: 0.01
@@ -6064,9 +6079,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConnectorSurface
   Type: 0
   Direction: 4
-  _connectorLayer:
-    serializedVersion: 2
-    m_Bits: 4096
+  _connectorLayerName: Connector
   AutoAlignToParent: 1
   AutoCollider: 1
   FaceThickness: 0.01
@@ -9654,9 +9667,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConnectorSurface
   Type: 0
   Direction: 3
-  _connectorLayer:
-    serializedVersion: 2
-    m_Bits: 4096
+  _connectorLayerName: Connector
   AutoAlignToParent: 1
   AutoCollider: 1
   FaceThickness: 0.01
@@ -11391,9 +11402,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConnectorSurface
   Type: 0
   Direction: 5
-  _connectorLayer:
-    serializedVersion: 2
-    m_Bits: 4096
+  _connectorLayerName: Connector
   AutoAlignToParent: 1
   AutoCollider: 1
   FaceThickness: 0.01
@@ -14773,9 +14782,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConnectorSurface
   Type: 0
   Direction: 0
-  _connectorLayer:
-    serializedVersion: 2
-    m_Bits: 4096
+  _connectorLayerName: Connector
   AutoAlignToParent: 1
   AutoCollider: 1
   FaceThickness: 0.01
@@ -15131,6 +15138,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <Configs>k__BackingField:
   - {fileID: 11400000, guid: e7baaf32b47617b4cb2d3c60c91e0fe0, type: 2}
+  - {fileID: 11400000, guid: 1db9cd870497b2b4ab56ef0ab80b538a, type: 2}
   - {fileID: 11400000, guid: 8fc1aa18febaa5d4e8bf2d5224973af3, type: 2}
   - {fileID: 11400000, guid: efed9795bff1450429611729d930accb, type: 2}
   Stack: 1
@@ -19964,7 +19972,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Builder.BuildGridState
   CellSize: 0.25
-  Root: {fileID: 1542544467853613457}
+  Origin: {fileID: 0}
 --- !u!1001 &8730160084324557553
 PrefabInstance:
   m_ObjectHideFlags: 0

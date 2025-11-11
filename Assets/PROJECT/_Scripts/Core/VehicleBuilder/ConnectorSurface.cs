@@ -28,7 +28,7 @@ public class ConnectorSurface : MonoBehaviour
     public FaceDirection Direction = FaceDirection.Up;
 
     [Header("Слой")]
-    public LayerMask _connectorLayer;
+    [SerializeField] private string _connectorLayerName = "Connector";
 
     [Header("Авто-настройка")]
     [Tooltip("Автоматически ставить коннектор на грань BoxCollider родителя.")]
@@ -80,10 +80,11 @@ public class ConnectorSurface : MonoBehaviour
             name = Direction.ToString();
         }
 
-        if (gameObject.layer != _connectorLayer)
-        {
-            gameObject.layer = _connectorLayer;
-        }
+        int layer = LayerMask.NameToLayer(_connectorLayerName);
+        if (layer >= 0 && layer <= 31)
+            gameObject.layer = layer;
+        else
+            Debug.LogWarning($"Invalid layer name: {_connectorLayerName}", this);
 
         if (AutoAlignToParent)
             AlignToParentCollider();
