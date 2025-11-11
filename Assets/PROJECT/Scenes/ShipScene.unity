@@ -4313,7 +4313,7 @@ GameObject:
   - component: {fileID: 407271479}
   - component: {fileID: 407271480}
   - component: {fileID: 407271481}
-  - component: {fileID: 407271482}
+  - component: {fileID: 407271483}
   m_Layer: 0
   m_Name: VEHICLE BUILDER
   m_TagString: Untagged
@@ -4376,7 +4376,7 @@ MonoBehaviour:
   Placer: {fileID: 407271480}
   BuildVolume: {fileID: 1711714799}
   WorldCamera: {fileID: 2147141476}
---- !u!114 &407271482
+--- !u!114 &407271483
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4385,15 +4385,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 407271477}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6216c342c2c2fd498b343332b51cadf, type: 3}
+  m_Script: {fileID: 11500000, guid: 1bd351a51065637489e52b324382b83b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WorldToInventoryPickup
+  m_EditorClassIdentifier: Assembly-CSharp::WorldToInventoryAndWorldDrag
   Cam: {fileID: 2147141476}
   ModuleMask:
     serializedVersion: 2
     m_Bits: 3584
   GridState: {fileID: 7774565345784231175}
-  InventoryController: {fileID: 849159703}
+  UiCanvas: {fileID: 1068305926}
+  InventoryController: {fileID: 0}
 --- !u!1001 &422676027
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11797,7 +11798,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1711714798
 Transform:
   m_ObjectHideFlags: 0
