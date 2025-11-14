@@ -14,7 +14,8 @@ public class ConnectorGridGenerator : MonoBehaviour
     [Header("Connectors")]
     public ConnectorType DefaultType = ConnectorType.Structure;
     public float FaceThickness = 0.01f;
-    public LayerMask ConectorLayer;
+    [Header("Connectors")]
+    public int ConnectorLayer = 12;
 
     [Header("Which faces")]
     public bool GenerateUp = true;
@@ -166,7 +167,7 @@ public class ConnectorGridGenerator : MonoBehaviour
                 go.transform.localPosition = localPos;
                 go.transform.localRotation = Quaternion.identity;
                 go.transform.localScale = Vector3.one;
-                go.layer = ConectorLayer;
+                go.layer = ConnectorLayer;
 
                 var cs = go.AddComponent<ConnectorSurface>();
                 cs.Type = DefaultType;
@@ -189,7 +190,7 @@ public class ConnectorGridGenerator : MonoBehaviour
             }
         }
     }
-    private void OnDrawGizmosSelected()
+    private void OnDrawGizmos()
     {
         if (Module == null) return;
 
@@ -200,12 +201,18 @@ public class ConnectorGridGenerator : MonoBehaviour
         float cell = Module.CellSize;
         if (cell <= 0f) return;
 
+        var mask = Module.Occupancy != null ? Module.Occupancy.LocalCells : null;
+        if (mask == null || mask.Length == 0) return;
+
+        // ћаксимальный размер сетки по конфигу Ц нужен только чтобы
+        // правильно вычислить "ноль" (левый-нижний-задний угол)
         Vector3Int grid = Module.GridSize;
         if (grid.x <= 0 || grid.y <= 0 || grid.z <= 0) return;
 
         Gizmos.matrix = transform.localToWorldMatrix;
 
-        Vector3 start =
+        // Ћокальный центр "€чейки (0,0,0)" Ч как и раньше в генераторе
+        Vector3 origin =
             SourceCollider.center -
             new Vector3(
                 (grid.x - 1) * cell * 0.5f,
@@ -215,16 +222,12 @@ public class ConnectorGridGenerator : MonoBehaviour
 
         Gizmos.color = Color.red;
 
-        for (int x = 0; x < grid.x; x++)
+        foreach (var c in mask)
         {
-            for (int y = 0; y < grid.y; y++)
-            {
-                for (int z = 0; z < grid.z; z++)
-                {
-                    Vector3 localCenter = start + new Vector3(x * cell, y * cell, z * cell);
-                    Gizmos.DrawWireCube(localCenter, Vector3.one * cell);
-                }
-            }
+            // предполагаем, что LocalCells заданы в тех же координатах,
+            // что и GridSize: (0..grid.x-1, 0..grid.y-1, 0..grid.z-1)
+            Vector3 localCenter = origin + new Vector3(c.x * cell, c.y * cell, c.z * cell);
+            Gizmos.DrawWireCube(localCenter, Vector3.one * cell);
         }
 
         Gizmos.matrix = Matrix4x4.identity;
