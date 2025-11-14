@@ -76,7 +76,6 @@ public static class LocalizationConfigsGenerator
         var fileName = $"{Sanitize(key)}.asset";
         var path = $"{folder}/{fileName}";
 
-        // Создаём / берём существующий конфиг
         var cfg = AssetDatabase.LoadAssetAtPath<Localization.LocalizationConfig>(path);
         if (cfg == null)
         {
@@ -84,7 +83,6 @@ public static class LocalizationConfigsGenerator
             AssetDatabase.CreateAsset(cfg, path);
         }
 
-        // Обновляем LocalizedString через SerializedObject (совместимо со старыми версиями пакета)
         var so = new SerializedObject(cfg);
         var locStrProp = so.FindProperty("_localizedString");
         if (locStrProp == null)
@@ -93,7 +91,6 @@ public static class LocalizationConfigsGenerator
             return;
         }
 
-        // m_TableReference
         var tableRefProp = locStrProp.FindPropertyRelative("m_TableReference");
         if (tableRefProp != null)
         {
@@ -101,10 +98,9 @@ public static class LocalizationConfigsGenerator
             if (nameProp != null) nameProp.stringValue = tableCollectionName;
 
             var guidProp = tableRefProp.FindPropertyRelative("m_TableCollectionNameGuid");
-            if (guidProp != null) guidProp.stringValue = string.Empty; // очищаем, чтобы резолвилось по имени
+            if (guidProp != null) guidProp.stringValue = string.Empty;
         }
 
-        // m_TableEntryReference
         var entryRefProp = locStrProp.FindPropertyRelative("m_TableEntryReference");
         if (entryRefProp != null)
         {
@@ -112,13 +108,12 @@ public static class LocalizationConfigsGenerator
             if (idProp != null) idProp.longValue = entryId;
 
             var keyProp = entryRefProp.FindPropertyRelative("m_Key");
-            if (keyProp != null) keyProp.stringValue = string.Empty;   // работаем по ID
+            if (keyProp != null) keyProp.stringValue = string.Empty;   
         }
 
         so.ApplyModifiedPropertiesWithoutUndo();
         EditorUtility.SetDirty(cfg);
 
-        // На всякий случай — имя ассета под ключ
         var onDisk = Path.GetFileNameWithoutExtension(path);
         var safe = Sanitize(key);
         if (!string.Equals(onDisk, safe))

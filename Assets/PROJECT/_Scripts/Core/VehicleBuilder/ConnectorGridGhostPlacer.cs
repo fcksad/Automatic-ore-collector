@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using static UnityEditor.Progress;
 
 namespace Builder
 {
@@ -34,9 +33,12 @@ namespace Builder
         public bool IsActive => _mod != null && _ghost != null;
 
         private List<Vector3Int> _currentCells = new();
+        public bool HasValidPlacement => _hasValidPlacement;
         private bool _hasValidPlacement;
+
         private Vector3 _lastValidPos;
         private Quaternion _lastValidRot;
+
 
         private void Awake()
         {

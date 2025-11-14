@@ -15,17 +15,9 @@ MonoBehaviour:
   <Id>k__BackingField: Wheel
   <DisplayName>k__BackingField: Wheel
   <Prefab>k__BackingField: {fileID: 8722215349843686196, guid: b832b05ce247e2c45ae704d0a3a11a2a, type: 3}
-  <PowerDraw>k__BackingField: 0
-  <PowerSupply>k__BackingField: 0
-  <Mass>k__BackingField: 0
-  <HP>k__BackingField: 0
-  <Armor>k__BackingField: 0
-  <CabinPower>k__BackingField: 0
-  <Cost>k__BackingField: 0
-  <Energy>k__BackingField: 0
-  Footprint2D:
-  - {x: 0, y: 0}
-  RequiredOverlap: 1
-  MountHeight: 0.25
-  RotationMode: 0
-  BoundsSize: {x: 0.5, y: 0.5, z: 0.5}
+  RotationMode: 1
+  CellSize: 0.25
+  GridSize: {x: 1, y: 1, z: 1}
+  Occupancy:
+    LocalCells:
+    - {x: 0, y: 0, z: 0}

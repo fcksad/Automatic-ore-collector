@@ -1,29 +1,37 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using Builder;
 using Inventory;
+using Service;
 
 public class WorldToInventoryAndWorldDrag : MonoBehaviour
 {
     [Header("World")]
     public Camera Cam;
-    public LayerMask ModuleMask;   
+    public LayerMask ModuleMask;  
 
     [Header("Grid")]
     public BuildGridState GridState;
 
     [Header("UI")]
-    public Canvas UiCanvas;        
+    public Canvas UiCanvas;
 
     [Header("Inventory")]
     public InventoryGridController InventoryController;
 
     [Header("Builder")]
-    public Builder.ConnectorGridGhostPlacer Placer;
+    public ConnectorGridGhostPlacer Placer;
 
     private bool _isDraggingFromWorld;
+    private Coroutine _dragRoutine;
+
+    private IInputService _inputService;
+
+    private Action _onLeftStarted;
+    private Action _onLeftCanceled;
+    private Action _onRightStarted;
 
     private void Awake()
     {
@@ -31,38 +39,149 @@ public class WorldToInventoryAndWorldDrag : MonoBehaviour
         if (!GridState) GridState = FindObjectOfType<BuildGridState>();
         if (!UiCanvas) UiCanvas = FindObjectOfType<Canvas>();
         if (!InventoryController) InventoryController = FindObjectOfType<InventoryGridController>();
-        if (!Placer) Placer = FindObjectOfType<Builder.ConnectorGridGhostPlacer>(); 
+        if (!Placer) Placer = FindObjectOfType<ConnectorGridGhostPlacer>();
+
+        _inputService = ServiceLocator.Get<IInputService>();
     }
 
-    private void Update()
+    private void Start()
     {
+        _onLeftStarted = OnLeftClickStarted;
+        _onLeftCanceled = OnLeftClickCanceled;
+        _onRightStarted = OnRightClickStarted;
+
+        _inputService.AddActionListener(CharacterAction.LeftClick,
+            onStarted: _onLeftStarted,
+            onCanceled: _onLeftCanceled);
+
+        _inputService.AddActionListener(CharacterAction.RightClick,
+            onStarted: _onRightStarted);
+    }
+
+    private void OnDestroy()
+    {
+        if (_inputService != null)
+        {
+            _inputService.RemoveActionListener(CharacterAction.LeftClick,
+                onStarted: _onLeftStarted,
+                onCanceled: _onLeftCanceled);
+
+            _inputService.RemoveActionListener(CharacterAction.RightClick,
+                onStarted: _onRightStarted);
+        }
+    }
+
+    private void OnLeftClickStarted()
+    {
+        if (DragContext.Item != null || _isDraggingFromWorld)
+            return;
+
         var mouse = Mouse.current;
         if (mouse == null) return;
 
-        if (_isDraggingFromWorld)
+        var pos = mouse.position.ReadValue();
+
+
+        if (UIChecker.IsOverUI(pos))
+            return;
+
+        var ray = Cam.ScreenPointToRay(pos);
+
+        if (Physics.Raycast(ray, out var hit, 1000f, ModuleMask))
         {
-            UpdateGhost(mouse);
+            var runtime = hit.collider.GetComponentInParent<BuildModuleRuntime>();
+            if (runtime != null)
+                StartDragFromWorld(runtime);
+        }
+    }
+
+    private void OnLeftClickCanceled()
+    {
+        if (!_isDraggingFromWorld)
+            return;
+
+        var item = DragContext.Item;
+        var mouse = Mouse.current;
+        if (mouse == null)
+        {
+            CleanupDrag();
             return;
         }
 
-        if (DragContext.Item != null) return;
+        var pos = mouse.position.ReadValue();
+        bool overUI = UIChecker.IsOverUI(pos);
 
-        if (mouse.leftButton.wasPressedThisFrame)
+        if (item != null && InventoryController != null)
         {
-            var pos = mouse.position.ReadValue();
-
-            if (UIChecker.IsOverUI(pos))
-                return;
-
-            var ray = Cam.ScreenPointToRay(pos);
-
-            if (Physics.Raycast(ray, out var hit, 1000f, ModuleMask))
+            if (overUI)
             {
-                var runtime = hit.collider.GetComponentInParent<BuildModuleRuntime>();
-                if (runtime != null)
-                    StartDragFromWorld(runtime);
+                InventoryController.AddItem(item.Config, item.Stack);
+
+                if (Placer && Placer.IsActive)
+                    Placer.End(false);
+            }
+            else
+            {
+                if (Placer && Placer.IsActive)
+                {
+                    if (Placer.HasValidPlacement)
+                    {
+                        Placer.End(true);
+                    }
+                    else
+                    {
+                        Placer.End(false);
+                        InventoryController.AddItem(item.Config, item.Stack);
+                    }
+                }
+                else
+                {
+                    InventoryController.AddItem(item.Config, item.Stack);
+                }
             }
         }
+
+        CleanupDrag();
+    }
+
+    private void OnRightClickStarted()
+    {
+        if (DragContext.Item != null || _isDraggingFromWorld)
+            return;
+
+        var mouse = Mouse.current;
+        if (mouse == null) return;
+
+        var pos = mouse.position.ReadValue();
+
+        if (UIChecker.IsOverUI(pos))
+            return;
+
+        var ray = Cam.ScreenPointToRay(pos);
+        if (Physics.Raycast(ray, out var hit, 1000f, ModuleMask))
+        {
+            var runtime = hit.collider.GetComponentInParent<BuildModuleRuntime>();
+            if (runtime != null)
+                QuickPickup(runtime);
+        }
+    }
+
+    private void QuickPickup(BuildModuleRuntime runtime)
+    {
+        var cfg = runtime.SourceConfig;
+        if (!cfg)
+        {
+            Debug.LogWarning("[WorldDrag] QuickPickup: runtime.SourceConfig is null");
+            return;
+        }
+
+        if (runtime.GridState)
+            runtime.GridState.Remove(runtime);
+
+        if (InventoryController != null)
+            InventoryController.AddItem(cfg, 1);
+
+        Destroy(runtime.gameObject);
     }
 
     private void StartDragFromWorld(BuildModuleRuntime runtime)
@@ -87,8 +206,12 @@ public class WorldToInventoryAndWorldDrag : MonoBehaviour
         Destroy(runtime.gameObject);
         CreateGhost(cfg.Icon);
 
-
         _isDraggingFromWorld = true;
+
+        if (_dragRoutine != null)
+            StopCoroutine(_dragRoutine);
+
+        _dragRoutine = StartCoroutine(DragFromWorldRoutine());
     }
 
     private void CreateGhost(Sprite icon)
@@ -120,55 +243,38 @@ public class WorldToInventoryAndWorldDrag : MonoBehaviour
         rt.sizeDelta = new Vector2(64, 64);
     }
 
-    private void UpdateGhost(Mouse mouse)
+    private System.Collections.IEnumerator DragFromWorldRoutine()
     {
-        if (DragContext.Ghost != null && UiCanvas != null)
+        while (_isDraggingFromWorld)
         {
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                UiCanvas.transform as RectTransform,
-                mouse.position.ReadValue(),
-                UiCanvas.worldCamera,
-                out var local);
+            var mouse = Mouse.current;
+            if (mouse == null) yield break;
 
-            DragContext.Ghost.anchoredPosition = local;
-        }
-
-        // кнопка больше не зажата — заканчиваем drag
-        if (!mouse.leftButton.isPressed)
-        {
-            var pos = mouse.position.ReadValue();
-            bool overUI = UIChecker.IsOverUI(pos);
-
-            var item = DragContext.Item;
-            bool hitModule = false;
-
-            // если не над UI – проверяем, попали ли по модульному коллайдеру
-            if (!overUI)
+            if (DragContext.Ghost != null && UiCanvas != null)
             {
-                var ray = Cam.ScreenPointToRay(pos);
-                hitModule = Physics.Raycast(ray, out var hit, 1000f, ModuleMask);
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    UiCanvas.transform as RectTransform,
+                    mouse.position.ReadValue(),
+                    UiCanvas.worldCamera,
+                    out var local);
+
+                DragContext.Ghost.anchoredPosition = local;
             }
 
-            if (item != null && InventoryController != null)
-            {
-                // 1) Над UI -> вернуть в инвентарь + отменить плейсер
-                // 2) Не над UI, но НЕ по модулю (пустота) -> тоже вернуть в инвентарь + отменить плейсер
-                if (overUI || !hitModule)
-                {
-                    InventoryController.AddItem(item.Config, item.Stack);
-
-                    if (Placer && Placer.IsActive)
-                        Placer.End(false); // 👈 ЯВНО говорим "не коммить, просто убери ghost"
-                }
-                // 3) Не над UI и есть hit по ModuleMask:
-                //    считаем, что хотим построить в мире → НЕ добавляем в инвентарь,
-                //    НЕ трогаем Placer – WorldPlacementBridge сам вызовет End(commit:true)
-            }
-
-            // В ЛЮБОМ СЛУЧАЕ чистим DragContext (и UI-ghost)
-            DragContext.Clear();
-            _isDraggingFromWorld = false;
+            yield return null;
         }
     }
-}
 
+    private void CleanupDrag()
+    {
+        _isDraggingFromWorld = false;
+
+        if (_dragRoutine != null)
+        {
+            StopCoroutine(_dragRoutine);
+            _dragRoutine = null;
+        }
+
+        DragContext.Clear();
+    }
+}

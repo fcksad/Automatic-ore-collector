@@ -82,8 +82,6 @@ public class ControlsController : MonoBehaviour
 
         _actionMap = _controlsService.GetFirstActionMap();
         GenerateBindings();
-
-
     }
 
     private void GenerateBindings()

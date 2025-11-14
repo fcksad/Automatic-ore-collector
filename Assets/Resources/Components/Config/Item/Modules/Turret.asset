@@ -15,9 +15,9 @@ MonoBehaviour:
   <Id>k__BackingField: Turret
   <DisplayName>k__BackingField: Turret
   <Prefab>k__BackingField: {fileID: 7346464108501629971, guid: 27201d39af4b43c419394b9d498ccb0b, type: 3}
-  RotationMode: 0
-  MountHeight: 0.1
-  BoundsSize: {x: 0.1, y: 0.1, z: 0.1}
-  Footprint2D:
-  - {x: 0, y: 0}
-  RequiredOverlap: 1
+  RotationMode: 1
+  CellSize: 0.25
+  GridSize: {x: 1, y: 1, z: 1}
+  Occupancy:
+    LocalCells:
+    - {x: 0, y: 0, z: 0}

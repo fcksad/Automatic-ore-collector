@@ -47,9 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConnectorSurface
   Type: 0
   Direction: 4
-  _connectorLayer:
-    serializedVersion: 2
-    m_Bits: 4096
+  _connectorLayerName: Connector
   AutoAlignToParent: 1
   AutoCollider: 1
   FaceThickness: 0.01
@@ -123,9 +121,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConnectorSurface
   Type: 0
   Direction: 0
-  _connectorLayer:
-    serializedVersion: 2
-    m_Bits: 4096
+  _connectorLayerName: Connector
   AutoAlignToParent: 1
   AutoCollider: 1
   FaceThickness: 0.01
@@ -164,6 +160,7 @@ GameObject:
   - component: {fileID: 7618772838676179949}
   - component: {fileID: 3840602700804818959}
   - component: {fileID: 7774565345597815855}
+  - component: {fileID: -7299544245257909433}
   m_Layer: 9
   m_Name: Base 1_1
   m_TagString: Untagged
@@ -269,6 +266,50 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &-7299544245257909433
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2145740389987036217}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Outline
+  _outlineMode: 0
+  _outlineColor: {r: 0.34950158, g: 0.9622642, b: 0.397635, a: 1}
+  _outlineWidth: 3
+  _precomputeOutline: 1
+  _bakeKeys:
+  - {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  _bakeValues:
+  - Data:
+    - {x: 0.57735026, y: -0.57735026, z: 0.57735026}
+    - {x: -0.57735026, y: -0.57735026, z: 0.57735026}
+    - {x: 0.57735026, y: 0.57735026, z: 0.57735026}
+    - {x: -0.57735026, y: 0.57735026, z: 0.57735026}
+    - {x: 0.57735026, y: 0.57735026, z: -0.57735026}
+    - {x: -0.57735026, y: 0.57735026, z: -0.57735026}
+    - {x: 0.57735026, y: -0.57735026, z: -0.57735026}
+    - {x: -0.57735026, y: -0.57735026, z: -0.57735026}
+    - {x: 0.57735026, y: 0.57735026, z: 0.57735026}
+    - {x: -0.57735026, y: 0.57735026, z: 0.57735026}
+    - {x: 0.57735026, y: 0.57735026, z: -0.57735026}
+    - {x: -0.57735026, y: 0.57735026, z: -0.57735026}
+    - {x: 0.57735026, y: -0.57735026, z: -0.57735026}
+    - {x: 0.57735026, y: -0.57735026, z: 0.57735026}
+    - {x: -0.57735026, y: -0.57735026, z: 0.57735026}
+    - {x: -0.57735026, y: -0.57735026, z: -0.57735026}
+    - {x: -0.57735026, y: -0.57735026, z: 0.57735026}
+    - {x: -0.57735026, y: 0.57735026, z: 0.57735026}
+    - {x: -0.57735026, y: 0.57735026, z: -0.57735026}
+    - {x: -0.57735026, y: -0.57735026, z: -0.57735026}
+    - {x: 0.57735026, y: -0.57735026, z: -0.57735026}
+    - {x: 0.57735026, y: 0.57735026, z: -0.57735026}
+    - {x: 0.57735026, y: 0.57735026, z: 0.57735026}
+    - {x: 0.57735026, y: -0.57735026, z: 0.57735026}
 --- !u!1 &3018755044933507441
 GameObject:
   m_ObjectHideFlags: 0
@@ -316,9 +357,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConnectorSurface
   Type: 0
   Direction: 1
-  _connectorLayer:
-    serializedVersion: 2
-    m_Bits: 4096
+  _connectorLayerName: Connector
   AutoAlignToParent: 1
   AutoCollider: 1
   FaceThickness: 0.01
@@ -392,9 +431,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConnectorSurface
   Type: 0
   Direction: 2
-  _connectorLayer:
-    serializedVersion: 2
-    m_Bits: 4096
+  _connectorLayerName: Connector
   AutoAlignToParent: 1
   AutoCollider: 1
   FaceThickness: 0.01
@@ -468,9 +505,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConnectorSurface
   Type: 0
   Direction: 5
-  _connectorLayer:
-    serializedVersion: 2
-    m_Bits: 4096
+  _connectorLayerName: Connector
   AutoAlignToParent: 1
   AutoCollider: 1
   FaceThickness: 0.01
@@ -544,9 +579,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConnectorSurface
   Type: 0
   Direction: 3
-  _connectorLayer:
-    serializedVersion: 2
-    m_Bits: 4096
+  _connectorLayerName: Connector
   AutoAlignToParent: 1
   AutoCollider: 1
   FaceThickness: 0.01
