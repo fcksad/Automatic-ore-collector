@@ -10,14 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 693553fd70246c04f8e1a898063cdcc8, type: 3}
-  m_Name: Turret
+  m_Name: Wheele
   m_EditorClassIdentifier: 
-  <Id>k__BackingField: Turret
-  <DisplayName>k__BackingField: Turret
-  <Prefab>k__BackingField: {fileID: 7346464108501629971, guid: 27201d39af4b43c419394b9d498ccb0b, type: 3}
+  <Id>k__BackingField: Cabine
+  <DisplayName>k__BackingField: Cabine
+  <Prefab>k__BackingField: {fileID: 8211757950451430714, guid: a39ea3b070ef1114aa9d5b8bb3a14903, type: 3}
   RotationMode: 1
   CellSize: 0.25
-  GridSize: {x: 1, y: 1, z: 1}
+  GridSize: {x: 2, y: 2, z: 1}
   Occupancy:
     LocalCells:
     - {x: 0, y: 0, z: 0}
+    - {x: 1, y: 0, z: 0}
+    - {x: 1, y: -1, z: 0}

@@ -8,7 +8,9 @@ public enum CharacterAction
     Move = 10,
     Rotate = 11,
     Scroll = 12,
-
+    Look = 13,
+    CameraSprint = 14,
+    CameraMode = 15,
 
     //Rotate
     RotateVerticalForward = 31,

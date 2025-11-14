@@ -14,10 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <Id>k__BackingField: Cabine
   <DisplayName>k__BackingField: Cabine
-  <Prefab>k__BackingField: {fileID: 2145740389987036217, guid: f2ede79d6b96d744c949183778fcf673, type: 3}
-  RotationMode: 2
+  <Prefab>k__BackingField: {fileID: 5571159996373376852, guid: 8158c09d864ab4d45bc4c6e0b89c4539, type: 3}
+  RotationMode: 1
   CellSize: 0.25
-  GridSize: {x: 1, y: 1, z: 1}
+  GridSize: {x: 1, y: 2, z: 1}
   Occupancy:
     LocalCells:
     - {x: 0, y: 0, z: 0}
+    - {x: 0, y: 1, z: 0}

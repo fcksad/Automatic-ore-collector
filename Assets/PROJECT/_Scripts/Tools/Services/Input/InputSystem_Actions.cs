@@ -143,6 +143,24 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CameraSprint"",
+                    ""type"": ""Button"",
+                    ""id"": ""9e88db52-c163-48ab-a553-7bd0137ad486"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CameraMode"",
+                    ""type"": ""Button"",
+                    ""id"": ""430cbb82-a48b-43a2-97a4-e24719bd0366"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -500,17 +518,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""560ff59b-63ec-4942-867f-9542c394a4bd"",
-                    ""path"": ""<Keyboard>/s"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""RotateVerticalBackwards"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""d050c8c2-87b5-4a79-81e8-714d45bc3fea"",
                     ""path"": ""<Keyboard>/d"",
                     ""interactions"": """",
@@ -522,7 +529,40 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""4acc27a0-e8d9-4124-9e45-c80e5d8597fa"",
+                    ""id"": ""570fc7e6-8f96-40a4-b53f-f94e5e2ee60c"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""CameraSprint"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7cceac00-d67b-4803-93da-ce6cf2b4deac"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""CameraMode"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c584e5bb-b7df-4eb7-a213-41e4ac0d3b97"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""RotateVerticalBackwards"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5f9d850a-f89b-44ab-8916-fbdee59e2359"",
                     ""path"": ""<Keyboard>/a"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -1179,6 +1219,8 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_RotateVerticalBackwards = m_Player.FindAction("RotateVerticalBackwards", throwIfNotFound: true);
         m_Player_RotateHorizontalForward = m_Player.FindAction("RotateHorizontalForward", throwIfNotFound: true);
         m_Player_RotateHorizontalBackwards = m_Player.FindAction("RotateHorizontalBackwards", throwIfNotFound: true);
+        m_Player_CameraSprint = m_Player.FindAction("CameraSprint", throwIfNotFound: true);
+        m_Player_CameraMode = m_Player.FindAction("CameraMode", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1273,6 +1315,8 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_RotateVerticalBackwards;
     private readonly InputAction m_Player_RotateHorizontalForward;
     private readonly InputAction m_Player_RotateHorizontalBackwards;
+    private readonly InputAction m_Player_CameraSprint;
+    private readonly InputAction m_Player_CameraMode;
     public struct PlayerActions
     {
         private @InputSystem_Actions m_Wrapper;
@@ -1290,6 +1334,8 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         public InputAction @RotateVerticalBackwards => m_Wrapper.m_Player_RotateVerticalBackwards;
         public InputAction @RotateHorizontalForward => m_Wrapper.m_Player_RotateHorizontalForward;
         public InputAction @RotateHorizontalBackwards => m_Wrapper.m_Player_RotateHorizontalBackwards;
+        public InputAction @CameraSprint => m_Wrapper.m_Player_CameraSprint;
+        public InputAction @CameraMode => m_Wrapper.m_Player_CameraMode;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -1338,6 +1384,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @RotateHorizontalBackwards.started += instance.OnRotateHorizontalBackwards;
             @RotateHorizontalBackwards.performed += instance.OnRotateHorizontalBackwards;
             @RotateHorizontalBackwards.canceled += instance.OnRotateHorizontalBackwards;
+            @CameraSprint.started += instance.OnCameraSprint;
+            @CameraSprint.performed += instance.OnCameraSprint;
+            @CameraSprint.canceled += instance.OnCameraSprint;
+            @CameraMode.started += instance.OnCameraMode;
+            @CameraMode.performed += instance.OnCameraMode;
+            @CameraMode.canceled += instance.OnCameraMode;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -1381,6 +1433,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @RotateHorizontalBackwards.started -= instance.OnRotateHorizontalBackwards;
             @RotateHorizontalBackwards.performed -= instance.OnRotateHorizontalBackwards;
             @RotateHorizontalBackwards.canceled -= instance.OnRotateHorizontalBackwards;
+            @CameraSprint.started -= instance.OnCameraSprint;
+            @CameraSprint.performed -= instance.OnCameraSprint;
+            @CameraSprint.canceled -= instance.OnCameraSprint;
+            @CameraMode.started -= instance.OnCameraMode;
+            @CameraMode.performed -= instance.OnCameraMode;
+            @CameraMode.canceled -= instance.OnCameraMode;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -1592,6 +1650,8 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         void OnRotateVerticalBackwards(InputAction.CallbackContext context);
         void OnRotateHorizontalForward(InputAction.CallbackContext context);
         void OnRotateHorizontalBackwards(InputAction.CallbackContext context);
+        void OnCameraSprint(InputAction.CallbackContext context);
+        void OnCameraMode(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {

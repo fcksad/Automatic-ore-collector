@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Service;                    
+using Service;
 
 namespace Builder
 {
@@ -44,6 +44,9 @@ namespace Builder
         private bool _prevVForward;
         private bool _prevVBackward;
 
+        private ConnectorSurface _currentTargetSurface;   
+        private ConnectorSurface _currentGhostSurface;    
+
         private void Awake()
         {
             if (!Cam) Cam = Camera.main;
@@ -76,6 +79,9 @@ namespace Builder
 
             _currentCells.Clear();
             _hasValidPlacement = false;
+
+            _currentTargetSurface = null;
+            _currentGhostSurface = null;
         }
 
         public void End(bool commit = false)
@@ -117,6 +123,9 @@ namespace Builder
             _fromIndex = -1;
             _currentCells.Clear();
             _hasValidPlacement = false;
+
+            _currentTargetSurface = null;
+            _currentGhostSurface = null;
         }
 
         private void Update()
@@ -139,7 +148,6 @@ namespace Builder
 
             HandleRotationInput();
 
-
             var targetSurface = hit.collider.GetComponentInParent<ConnectorSurface>();
             if (targetSurface != null)
             {
@@ -150,6 +158,9 @@ namespace Builder
                 var cell = GridState.Grid.WorldToCell(hit.point);
                 var worldPos = GridState.Grid.CellToWorld(cell);
                 _ghost.transform.position = worldPos;
+
+                _currentTargetSurface = null;
+                _currentGhostSurface = null;
             }
 
             bool valid = true;
@@ -170,8 +181,6 @@ namespace Builder
             }
         }
 
-        // ---------- ROTATION INPUT ----------
-
         private void HandleRotationInput()
         {
             if (_input == null || _mod == null) return;
@@ -181,7 +190,6 @@ namespace Builder
             bool vF = _input.IsPressed(CharacterAction.RotateVerticalForward);
             bool vB = _input.IsPressed(CharacterAction.RotateVerticalBackwards);
 
-            // ловим фронты
             if (hF && !_prevHForward)
                 RotateHorizontal(+1);
 
@@ -208,7 +216,18 @@ namespace Builder
                 _mod.RotationMode != RotationMode.HorizontalOnly)
                 return;
 
-            _ghost.transform.Rotate(Vector3.up, 90f * dir, Space.World);
+            if (_currentTargetSurface == null || _currentGhostSurface == null)
+            {
+                _ghost.transform.Rotate(Vector3.up, 90f * dir, Space.World);
+                return;
+            }
+
+            Vector3 pivot = _currentTargetSurface.WorldPosition;
+            Vector3 normal = _currentTargetSurface.WorldNormal;
+
+            _ghost.transform.RotateAround(pivot, normal, 90f * dir);
+
+            SnapGhostToCurrentPair();
         }
 
         private void RotateVertical(int dir)
@@ -219,36 +238,99 @@ namespace Builder
                 _mod.RotationMode != RotationMode.VerticalOnly)
                 return;
 
-            _ghost.transform.Rotate(Vector3.right, 90f * dir, Space.World);
+            if (_currentTargetSurface == null || _currentGhostSurface == null)
+            {
+                _ghost.transform.Rotate(Vector3.right, 90f * dir, Space.World);
+                return;
+            }
+
+            Vector3 pivot = _currentTargetSurface.WorldPosition;
+            Vector3 normal = _currentTargetSurface.WorldNormal;
+
+            Vector3 axis = Vector3.Cross(normal, Vector3.up);
+            if (axis.sqrMagnitude < 0.0001f)
+                axis = Vector3.Cross(normal, Vector3.forward);
+            axis.Normalize();
+
+            _ghost.transform.RotateAround(pivot, axis, 90f * dir);
+
+            SnapGhostToCurrentPair();
+        }
+
+
+        private FaceDirection GetOpposite(FaceDirection d)
+        {
+            switch (d)
+            {
+                case FaceDirection.Up: return FaceDirection.Down;
+                case FaceDirection.Down: return FaceDirection.Up;
+                case FaceDirection.Left: return FaceDirection.Right;
+                case FaceDirection.Right: return FaceDirection.Left;
+                case FaceDirection.Forward: return FaceDirection.Back;
+                case FaceDirection.Back: return FaceDirection.Forward;
+            }
+            return d;
         }
 
         private void AlignToConnector(ConnectorSurface target)
         {
-            if (!_ghost) return;
+            if (!_ghost || target == null) return;
 
-            var mySurfaces = _ghost.GetComponentsInChildren<ConnectorSurface>();
-            if (mySurfaces.Length == 0) return;
+            bool targetChanged = target != _currentTargetSurface;
+            _currentTargetSurface = target;
 
-            ConnectorSurface my = null;
-            foreach (var s in mySurfaces)
+            if (_currentGhostSurface == null || targetChanged)
             {
-                if (s.Type == target.Type)
+                FaceDirection desiredDir = GetOpposite(target.Direction);
+
+                _currentGhostSurface = FindGhostSurfaceOfTypeAndDir(target.Type, desiredDir);
+                if (_currentGhostSurface == null)
                 {
-                    my = s;
-                    break;
+                    _currentGhostSurface = FindGhostSurfaceOfType(target.Type);
+                    if (_currentGhostSurface == null) return;
                 }
             }
-            if (my == null) my = mySurfaces[0];
+
+            SnapGhostToCurrentPair();
+        }
+
+        private ConnectorSurface FindGhostSurfaceOfType(ConnectorType type)
+        {
+            var all = _ghost.GetComponentsInChildren<ConnectorSurface>();
+            foreach (var s in all)
+                if (s.Type == type)
+                    return s;
+            return null;
+        }
+
+        private ConnectorSurface FindGhostSurfaceOfTypeAndDir(ConnectorType type, FaceDirection dir)
+        {
+            var all = _ghost.GetComponentsInChildren<ConnectorSurface>();
+            foreach (var s in all)
+                if (s.Type == type && s.Direction == dir)
+                    return s;
+            return null;
+        }
+
+
+
+        private void SnapGhostToCurrentPair()
+        {
+            if (_currentGhostSurface == null || _currentTargetSurface == null || _ghost == null)
+                return;
 
             var ghostTr = _ghost.transform;
 
-            var targetNormal = target.WorldNormal;
-            var myNormal = my.WorldNormal;
+            var myPos = _currentGhostSurface.WorldPosition;
+            var myNormal = _currentGhostSurface.WorldNormal;
+
+            var targetPos = _currentTargetSurface.WorldPosition;
+            var targetNormal = _currentTargetSurface.WorldNormal;
 
             var rot = Quaternion.FromToRotation(myNormal, -targetNormal);
             ghostTr.rotation = rot * ghostTr.rotation;
 
-            var delta = target.WorldPosition - my.WorldPosition;
+            var delta = targetPos - myPos;
             ghostTr.position += delta;
         }
 
