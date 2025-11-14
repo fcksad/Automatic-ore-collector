@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Builder
@@ -24,18 +24,49 @@ namespace Builder
         {
             cells = new List<Vector3Int>();
 
-            if (mod == null || ghost == null)
+            if (mod == null)
+            {
+                Debug.LogWarning("[GridState.CanPlace] ❌ ModuleConfig = null");
                 return false;
+            }
 
-            var cell = Grid.WorldToCell(ghost.position);
+            if (ghost == null)
+            {
+                Debug.LogWarning("[GridState.CanPlace] ❌ Ghost = null");
+                return false;
+            }
+
+            var worldPos = ghost.position;
+            var cell = Grid.WorldToCell(worldPos);
             cells.Add(cell);
+
+            Debug.Log(
+                $"[GridState.CanPlace] ---- CHECK ----\n" +
+                $"• Ghost world: {worldPos}\n" +
+                $"• Cell: {cell}\n" +
+                $"• Rotation: {ghost.rotation.eulerAngles}\n" +
+                $"• Model: {mod.name}"
+            );
 
             foreach (var c in cells)
             {
                 if (_occupied.ContainsKey(c))
+                {
+                    Debug.LogWarning(
+                        $"[GridState.CanPlace] ❌ CELL BLOCKED!\n" +
+                        $"• Cell: {c}\n" +
+                        $"• Occupied by: {_occupied[c].name}"
+                    );
+
                     return false;
+                }
+                else
+                {
+                    Debug.Log($"[GridState.CanPlace] ✔ Free cell: {c}");
+                }
             }
 
+            Debug.Log($"[GridState.CanPlace] ✔ RESULT: Placement OK\n");
             return true;
         }
 

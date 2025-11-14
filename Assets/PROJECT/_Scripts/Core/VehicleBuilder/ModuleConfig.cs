@@ -2,7 +2,7 @@
 
 namespace Builder
 {
-    public enum RotationMode { Any, YawOnly, Snap90 }
+    public enum RotationMode { None, Any, HorizontalOnly, VerticalOnly}
 
     [System.Serializable]
     public class ModuleOccupancyMask
@@ -20,11 +20,11 @@ namespace Builder
         [field: SerializeField] public GameObject Prefab { get; private set; }
 
         [Header("Поворот")]
-        public RotationMode RotationMode = RotationMode.Snap90;
+        public RotationMode RotationMode;
 
         [Header("Грид")]
         public float CellSize = 0.25f;        
-        public Vector3Int GridSize = Vector3Int.one; // сколько клеток примерно занимает блок (пока просто для инфы)
+        public Vector3Int GridSize = Vector3Int.one; 
 
         [Header("Занятые клетки")]
         public ModuleOccupancyMask Occupancy = new ModuleOccupancyMask();

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Service;                    
 
 namespace Builder
 {
@@ -16,10 +17,7 @@ namespace Builder
         public Material BadMat;
 
         [Header("Raycast")]
-        public LayerMask RaycastMask; 
-
-        [Header("Input")]
-        public Key RotateKey = Key.R;
+        public LayerMask RaycastMask;
 
         [Header("Grid State")]
         public BuildGridState GridState;
@@ -39,6 +37,12 @@ namespace Builder
         private Vector3 _lastValidPos;
         private Quaternion _lastValidRot;
 
+        private IInputService _input;
+
+        private bool _prevHForward;
+        private bool _prevHBackward;
+        private bool _prevVForward;
+        private bool _prevVBackward;
 
         private void Awake()
         {
@@ -49,6 +53,8 @@ namespace Builder
 
             if (GridState)
                 CellSize = GridState.CellSize;
+
+            _input = ServiceLocator.Get<IInputService>();
         }
 
         public void Begin(ModuleConfig mod)
@@ -85,7 +91,7 @@ namespace Builder
                     GridState.Commit(_mod, real.transform, _currentCells);
                 }
 
-                var rt = real.AddComponent<Builder.BuildModuleRuntime>();
+                var rt = real.AddComponent<BuildModuleRuntime>();
                 rt.GridState = GridState;
                 if (_currentCells != null && _currentCells.Count > 0)
                     rt.OccupiedCells.AddRange(_currentCells);
@@ -131,10 +137,8 @@ namespace Builder
 
             _ghost.SetActive(true);
 
-            if (Keyboard.current[RotateKey].wasPressedThisFrame)
-            {
-                RotateGhost90();
-            }
+            HandleRotationInput();
+
 
             var targetSurface = hit.collider.GetComponentInParent<ConnectorSurface>();
             if (targetSurface != null)
@@ -166,20 +170,56 @@ namespace Builder
             }
         }
 
-        private void RotateGhost90()
+        // ---------- ROTATION INPUT ----------
+
+        private void HandleRotationInput()
+        {
+            if (_input == null || _mod == null) return;
+
+            bool hF = _input.IsPressed(CharacterAction.RotateHorizontalForward);
+            bool hB = _input.IsPressed(CharacterAction.RotateHorizontalBackwards);
+            bool vF = _input.IsPressed(CharacterAction.RotateVerticalForward);
+            bool vB = _input.IsPressed(CharacterAction.RotateVerticalBackwards);
+
+            // ловим фронты
+            if (hF && !_prevHForward)
+                RotateHorizontal(+1);
+
+            if (hB && !_prevHBackward)
+                RotateHorizontal(-1);
+
+            if (vF && !_prevVForward)
+                RotateVertical(+1);
+
+            if (vB && !_prevVBackward)
+                RotateVertical(-1);
+
+            _prevHForward = hF;
+            _prevHBackward = hB;
+            _prevVForward = vF;
+            _prevVBackward = vB;
+        }
+
+        private void RotateHorizontal(int dir)
         {
             if (!_ghost) return;
 
-            switch (_mod.RotationMode)
-            {
-                case RotationMode.Any:
-                case RotationMode.Snap90:
-                    _ghost.transform.Rotate(Vector3.up, 90f, Space.Self);
-                    break;
-                case RotationMode.YawOnly:
-                    _ghost.transform.Rotate(Vector3.up, 90f, Space.World);
-                    break;
-            }
+            if (_mod.RotationMode != RotationMode.Any &&
+                _mod.RotationMode != RotationMode.HorizontalOnly)
+                return;
+
+            _ghost.transform.Rotate(Vector3.up, 90f * dir, Space.World);
+        }
+
+        private void RotateVertical(int dir)
+        {
+            if (!_ghost) return;
+
+            if (_mod.RotationMode != RotationMode.Any &&
+                _mod.RotationMode != RotationMode.VerticalOnly)
+                return;
+
+            _ghost.transform.Rotate(Vector3.right, 90f * dir, Space.World);
         }
 
         private void AlignToConnector(ConnectorSurface target)
