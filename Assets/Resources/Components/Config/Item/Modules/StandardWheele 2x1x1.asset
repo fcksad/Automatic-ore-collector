@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 693553fd70246c04f8e1a898063cdcc8, type: 3}
+  m_Name: StandardWheele 2x1x1
+  m_EditorClassIdentifier: 
+  <Id>k__BackingField: Cabine
+  <DisplayName>k__BackingField: Cabine
+  <Prefab>k__BackingField: {fileID: 3476104684580585160, guid: c9e2274cbbba7a64982892b6e7de469c, type: 3}
+  RotationMode: 1
+  CellSize: 0.25
+  GridSize: {x: 2, y: 1, z: 1}
+  Occupancy:
+    LocalCells:
+    - {x: 0, y: 0, z: 0}
+    - {x: 1, y: 0, z: 0}

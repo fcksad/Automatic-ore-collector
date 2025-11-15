@@ -19,6 +19,16 @@ namespace Builder
         [field: SerializeField] public string DisplayName { get; private set; }
         [field: SerializeField] public GameObject Prefab { get; private set; }
 
+        //вес модуля
+
+        //броня(хп)
+
+        //грузоподьемность
+
+        //для колес отдельные характеристики как и для оружий так и для кузова(типо сколько туррелей поддерживает и тд или урон от блока, типо бамбер с шипаим
+
+        //
+
         [Header("Поворот")]
         public RotationMode RotationMode;
 

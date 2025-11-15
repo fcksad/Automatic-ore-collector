@@ -45,25 +45,9 @@ namespace Builder
         private bool _prevVBackward;
 
         private ConnectorSurface _currentTargetSurface;   
-        private ConnectorSurface _currentGhostSurface;
-
-
-        private Vector3 _ghostLocalConnectorPos;    
-        private Vector3 _ghostLocalConnectorNormal;  
-        private int _spinIndex;
 
         private readonly List<ConnectorSurface> _ghostCandidates = new();
-        private int _ghostCandidateIndex;
 
-        private static readonly Vector3[] FaceDirVectors =
-        {
-    Vector3.up,     // Up
-    Vector3.down,   // Down
-    Vector3.left,   // Left
-    Vector3.right,  // Right
-    Vector3.forward,// Forward
-    Vector3.back    // Back
-};
 
         private void Awake()
         {
@@ -99,10 +83,7 @@ namespace Builder
             _hasValidPlacement = false;
 
             _currentTargetSurface = null;
-            _currentGhostSurface = null;
-            _spinIndex = 0;
             _ghostCandidates.Clear();
-            _ghostCandidateIndex = 0;
         }
 
         public void End(bool commit = false)
@@ -146,11 +127,8 @@ namespace Builder
             _hasValidPlacement = false;
 
             _currentTargetSurface = null;
-            _currentGhostSurface = null;
 
-            _spinIndex = 0;
             _ghostCandidates.Clear();
-            _ghostCandidateIndex = 0;
         }
 
         private void Update()
@@ -185,7 +163,6 @@ namespace Builder
                 _ghost.transform.position = worldPos;
 
                 _currentTargetSurface = null;
-                _currentGhostSurface = null;
             }
 
             bool valid = true;
@@ -235,140 +212,71 @@ namespace Builder
 
         private void RotateHorizontal(int dir)
         {
-            if (!_ghost) return;
+            if (_ghost == null) return;
 
-            if (_mod.RotationMode != RotationMode.Any &&
-                _mod.RotationMode != RotationMode.HorizontalOnly)
-                return;
+            Vector3 pivot = _currentTargetSurface != null
+                ? _currentTargetSurface.WorldPosition
+                : _ghost.transform.position;
 
-            // если не на коннекторе – старое поведение в мире
-            if (_currentTargetSurface == null || _ghostCandidates.Count == 0)
-            {
-                _ghost.transform.Rotate(Vector3.up, 90f * dir, Space.World);
-                return;
-            }
+            _ghost.transform.RotateAround(pivot, Vector3.up, 90f * dir);
 
-            // крутим "по кругу" набор подходящих граней модуля
-            _ghostCandidateIndex += dir;
-            int count = _ghostCandidates.Count;
-            _ghostCandidateIndex = ((_ghostCandidateIndex % count) + count) % count;
-
-            _currentGhostSurface = _ghostCandidates[_ghostCandidateIndex];
-
-            // при смене грани сбрасываем спин вокруг нормали
-            _spinIndex = 0;
-
-            CacheLocalConnectorData();
-            RebuildOnConnector();
-        }
-
-        private void CacheLocalConnectorData()
-        {
-            if (_currentGhostSurface == null) return;
-
-            _ghostLocalConnectorPos = _currentGhostSurface.transform.localPosition;
-            _ghostLocalConnectorNormal = FaceDirVectors[(int)_currentGhostSurface.Direction];
+            if (_currentTargetSurface != null)
+                SnapToConnector();
         }
 
         private void RotateVertical(int dir)
         {
-            if (!_ghost) return;
+            if (_ghost == null) return;
 
-            if (_mod.RotationMode != RotationMode.Any &&
-                _mod.RotationMode != RotationMode.VerticalOnly)
-                return;
+            Vector3 pivot = _currentTargetSurface != null
+                ? _currentTargetSurface.WorldPosition
+                : _ghost.transform.position;
 
-            if (_currentTargetSurface == null || _currentGhostSurface == null)
-            {
-                _ghost.transform.Rotate(Vector3.right, 90f * dir, Space.World);
-                return;
-            }
+            Vector3 axis = _ghost.transform.right;
 
-            _spinIndex += dir;
-            _spinIndex = ((_spinIndex % 4) + 4) % 4;
+            _ghost.transform.RotateAround(pivot, axis, 90f * dir);
 
-            RebuildOnConnector();
-        }
-
-
-        private FaceDirection GetOpposite(FaceDirection d)
-        {
-            switch (d)
-            {
-                case FaceDirection.Up: return FaceDirection.Down;
-                case FaceDirection.Down: return FaceDirection.Up;
-                case FaceDirection.Left: return FaceDirection.Right;
-                case FaceDirection.Right: return FaceDirection.Left;
-                case FaceDirection.Forward: return FaceDirection.Back;
-                case FaceDirection.Back: return FaceDirection.Forward;
-            }
-            return d;
+            if (_currentTargetSurface != null)
+                SnapToConnector();
         }
 
         private void AlignToConnector(ConnectorSurface target)
         {
-            if (!_ghost || target == null) return;
+            if (_ghost == null || target == null) return;
 
-            bool targetChanged = target != _currentTargetSurface;
             _currentTargetSurface = target;
-
-            if (targetChanged)
-            {
-                // пересобираем список всех граней такого же типа
-                _ghostCandidates.Clear();
-                foreach (var s in _ghost.GetComponentsInChildren<ConnectorSurface>())
-                {
-                    if (s.Type == target.Type)
-                        _ghostCandidates.Add(s);
-                }
-
-                _ghostCandidateIndex = 0;
-                _spinIndex = 0;
-            }
-
-            if (_ghostCandidates.Count == 0) return;
-
-            if (_currentGhostSurface == null || targetChanged)
-            {
-                // стартовая — та, что имеет направление, противоположное кости
-                FaceDirection desiredDir = GetOpposite(target.Direction);
-                _currentGhostSurface = _ghostCandidates.Find(s => s.Direction == desiredDir);
-
-                // если такой нет – просто первая по списку
-                if (_currentGhostSurface == null)
-                {
-                    _currentGhostSurface = _ghostCandidates[0];
-                }
-
-                _ghostCandidateIndex = _ghostCandidates.IndexOf(_currentGhostSurface);
-            }
-
-            CacheLocalConnectorData();
-            RebuildOnConnector();
+            SnapToConnector();
         }
 
-        private void RebuildOnConnector()
+        private void SnapToConnector()
         {
-            if (_ghost == null ||
-                _currentTargetSurface == null ||
-                _currentGhostSurface == null)
+            if (_ghost == null || _currentTargetSurface == null) return;
+
+            var targetPos = _currentTargetSurface.WorldPosition;
+            var targetNormal = _currentTargetSurface.WorldNormal;
+
+            ConnectorSurface best = null;
+            float bestDot = 1f; 
+
+            var all = _ghost.GetComponentsInChildren<ConnectorSurface>();
+            foreach (var s in all)
+            {
+                if (s.Type != _currentTargetSurface.Type)
+                    continue;
+
+                float dot = Vector3.Dot(s.WorldNormal, targetNormal);
+                if (dot < bestDot)
+                {
+                    bestDot = dot;
+                    best = s;
+                }
+            }
+
+            if (best == null)
                 return;
 
-            var ghostTr = _ghost.transform;
-
-            Vector3 targetPos = _currentTargetSurface.WorldPosition;
-            Vector3 targetNormal = -_currentTargetSurface.WorldNormal;
-
-            Vector3 localNormal = _ghostLocalConnectorNormal.normalized;
-            Vector3 localPos = _ghostLocalConnectorPos;
-
-            Quaternion baseRot = Quaternion.FromToRotation(localNormal, targetNormal);
-            Quaternion spinRot = Quaternion.AngleAxis(_spinIndex * 90f, targetNormal);
-            Quaternion worldRot = spinRot * baseRot;
-
-            Vector3 worldPos = targetPos - worldRot * localPos;
-
-            ghostTr.SetPositionAndRotation(worldPos, worldRot);
+            var delta = targetPos - best.WorldPosition;
+            _ghost.transform.position += delta;
         }
 
         private void SetGhostMaterial(Material mat)
