@@ -28,11 +28,9 @@ namespace Builder
             result.Clear();
             if (mod == null || ghost == null || Grid == null) return;
 
-            // 1) Локальный центр грида модуля относительно pivot-а
             float cell = Grid.CellSize;
             Vector3Int gridSize = mod.GridSize;
 
-            // смещение до центра первой клетки (0,0,0)
             Vector3 gridOriginLocal =
                 new Vector3(
                     -(gridSize.x - 1) * cell * 0.5f,
@@ -40,7 +38,6 @@ namespace Builder
                     -(gridSize.z - 1) * cell * 0.5f
                 );
 
-            // 2) Маска занятых ячеек
             var mask = (mod.Occupancy != null &&
                         mod.Occupancy.LocalCells != null &&
                         mod.Occupancy.LocalCells.Length > 0)
@@ -49,7 +46,6 @@ namespace Builder
 
             foreach (var localCell in mask)
             {
-                // локальный центр этой клетки в координатах модуля
                 Vector3 localCenter =
                     gridOriginLocal +
                     new Vector3(
@@ -57,29 +53,13 @@ namespace Builder
                         localCell.y * cell,
                         localCell.z * cell
                     );
-
-                // в мир
                 Vector3 worldCenter = ghost.TransformPoint(localCenter);
 
-                // в индексы грида
                 Vector3Int worldCell = Grid.WorldToCell(worldCenter);
 
                 if (!result.Contains(worldCell))
                     result.Add(worldCell);
             }
-        }
-
-        private Vector3Int AxisFromVector(Vector3 v)
-        {
-            var ax = Mathf.Abs(v.x);
-            var ay = Mathf.Abs(v.y);
-            var az = Mathf.Abs(v.z);
-
-            if (ax >= ay && ax >= az)
-                return new Vector3Int(v.x >= 0 ? 1 : -1, 0, 0);
-            if (ay >= ax && ay >= az)
-                return new Vector3Int(0, v.y >= 0 ? 1 : -1, 0);
-            return new Vector3Int(0, 0, v.z >= 0 ? 1 : -1);
         }
 
         public bool CanPlace(ModuleConfig mod, Transform ghost, out List<Vector3Int> cells)
@@ -91,13 +71,10 @@ namespace Builder
 
             GetCellsForModule(mod, ghost, cells);
 
-            Debug.Log($"[GridState.CanPlace] {mod.name} -> {cells.Count} cells");
-
             foreach (var c in cells)
             {
                 if (_occupied.ContainsKey(c))
                 {
-                    Debug.Log($"[GridState.CanPlace] BLOCKED: {c} by {_occupied[c].name}");
                     return false;
                 }
             }
@@ -141,15 +118,6 @@ namespace Builder
             float s = CellSize;
 
             Gizmos.color = new Color(0f, 1f, 1f, 0.1f);
-
-           /* for (int x = -DebugRadius; x <= DebugRadius; x++)
-                for (int y = -1; y <= 1; y++)
-                    for (int z = -DebugRadius; z <= DebugRadius; z++)
-                    {
-                        var cell = new Vector3Int(x, y, z);
-                        Vector3 center = Grid.CellToWorld(cell);
-                        Gizmos.DrawWireCube(center, Vector3.one * s);
-                    }*/
 
             Gizmos.color = new Color(1f, 0f, 0f, 0.45f);
 

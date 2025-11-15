@@ -45,7 +45,25 @@ namespace Builder
         private bool _prevVBackward;
 
         private ConnectorSurface _currentTargetSurface;   
-        private ConnectorSurface _currentGhostSurface;    
+        private ConnectorSurface _currentGhostSurface;
+
+
+        private Vector3 _ghostLocalConnectorPos;    
+        private Vector3 _ghostLocalConnectorNormal;  
+        private int _spinIndex;
+
+        private readonly List<ConnectorSurface> _ghostCandidates = new();
+        private int _ghostCandidateIndex;
+
+        private static readonly Vector3[] FaceDirVectors =
+        {
+    Vector3.up,     // Up
+    Vector3.down,   // Down
+    Vector3.left,   // Left
+    Vector3.right,  // Right
+    Vector3.forward,// Forward
+    Vector3.back    // Back
+};
 
         private void Awake()
         {
@@ -82,6 +100,9 @@ namespace Builder
 
             _currentTargetSurface = null;
             _currentGhostSurface = null;
+            _spinIndex = 0;
+            _ghostCandidates.Clear();
+            _ghostCandidateIndex = 0;
         }
 
         public void End(bool commit = false)
@@ -126,6 +147,10 @@ namespace Builder
 
             _currentTargetSurface = null;
             _currentGhostSurface = null;
+
+            _spinIndex = 0;
+            _ghostCandidates.Clear();
+            _ghostCandidateIndex = 0;
         }
 
         private void Update()
@@ -216,18 +241,33 @@ namespace Builder
                 _mod.RotationMode != RotationMode.HorizontalOnly)
                 return;
 
-            if (_currentTargetSurface == null || _currentGhostSurface == null)
+            // если не на коннекторе – старое поведение в мире
+            if (_currentTargetSurface == null || _ghostCandidates.Count == 0)
             {
                 _ghost.transform.Rotate(Vector3.up, 90f * dir, Space.World);
                 return;
             }
 
-            Vector3 pivot = _currentTargetSurface.WorldPosition;
-            Vector3 normal = _currentTargetSurface.WorldNormal;
+            // крутим "по кругу" набор подходящих граней модуля
+            _ghostCandidateIndex += dir;
+            int count = _ghostCandidates.Count;
+            _ghostCandidateIndex = ((_ghostCandidateIndex % count) + count) % count;
 
-            _ghost.transform.RotateAround(pivot, normal, 90f * dir);
+            _currentGhostSurface = _ghostCandidates[_ghostCandidateIndex];
 
-            SnapGhostToCurrentPair();
+            // при смене грани сбрасываем спин вокруг нормали
+            _spinIndex = 0;
+
+            CacheLocalConnectorData();
+            RebuildOnConnector();
+        }
+
+        private void CacheLocalConnectorData()
+        {
+            if (_currentGhostSurface == null) return;
+
+            _ghostLocalConnectorPos = _currentGhostSurface.transform.localPosition;
+            _ghostLocalConnectorNormal = FaceDirVectors[(int)_currentGhostSurface.Direction];
         }
 
         private void RotateVertical(int dir)
@@ -244,17 +284,10 @@ namespace Builder
                 return;
             }
 
-            Vector3 pivot = _currentTargetSurface.WorldPosition;
-            Vector3 normal = _currentTargetSurface.WorldNormal;
+            _spinIndex += dir;
+            _spinIndex = ((_spinIndex % 4) + 4) % 4;
 
-            Vector3 axis = Vector3.Cross(normal, Vector3.up);
-            if (axis.sqrMagnitude < 0.0001f)
-                axis = Vector3.Cross(normal, Vector3.forward);
-            axis.Normalize();
-
-            _ghost.transform.RotateAround(pivot, axis, 90f * dir);
-
-            SnapGhostToCurrentPair();
+            RebuildOnConnector();
         }
 
 
@@ -279,59 +312,63 @@ namespace Builder
             bool targetChanged = target != _currentTargetSurface;
             _currentTargetSurface = target;
 
-            if (_currentGhostSurface == null || targetChanged)
+            if (targetChanged)
             {
-                FaceDirection desiredDir = GetOpposite(target.Direction);
-
-                _currentGhostSurface = FindGhostSurfaceOfTypeAndDir(target.Type, desiredDir);
-                if (_currentGhostSurface == null)
+                // пересобираем список всех граней такого же типа
+                _ghostCandidates.Clear();
+                foreach (var s in _ghost.GetComponentsInChildren<ConnectorSurface>())
                 {
-                    _currentGhostSurface = FindGhostSurfaceOfType(target.Type);
-                    if (_currentGhostSurface == null) return;
+                    if (s.Type == target.Type)
+                        _ghostCandidates.Add(s);
                 }
+
+                _ghostCandidateIndex = 0;
+                _spinIndex = 0;
             }
 
-            SnapGhostToCurrentPair();
+            if (_ghostCandidates.Count == 0) return;
+
+            if (_currentGhostSurface == null || targetChanged)
+            {
+                // стартовая — та, что имеет направление, противоположное кости
+                FaceDirection desiredDir = GetOpposite(target.Direction);
+                _currentGhostSurface = _ghostCandidates.Find(s => s.Direction == desiredDir);
+
+                // если такой нет – просто первая по списку
+                if (_currentGhostSurface == null)
+                {
+                    _currentGhostSurface = _ghostCandidates[0];
+                }
+
+                _ghostCandidateIndex = _ghostCandidates.IndexOf(_currentGhostSurface);
+            }
+
+            CacheLocalConnectorData();
+            RebuildOnConnector();
         }
 
-        private ConnectorSurface FindGhostSurfaceOfType(ConnectorType type)
+        private void RebuildOnConnector()
         {
-            var all = _ghost.GetComponentsInChildren<ConnectorSurface>();
-            foreach (var s in all)
-                if (s.Type == type)
-                    return s;
-            return null;
-        }
-
-        private ConnectorSurface FindGhostSurfaceOfTypeAndDir(ConnectorType type, FaceDirection dir)
-        {
-            var all = _ghost.GetComponentsInChildren<ConnectorSurface>();
-            foreach (var s in all)
-                if (s.Type == type && s.Direction == dir)
-                    return s;
-            return null;
-        }
-
-
-
-        private void SnapGhostToCurrentPair()
-        {
-            if (_currentGhostSurface == null || _currentTargetSurface == null || _ghost == null)
+            if (_ghost == null ||
+                _currentTargetSurface == null ||
+                _currentGhostSurface == null)
                 return;
 
             var ghostTr = _ghost.transform;
 
-            var myPos = _currentGhostSurface.WorldPosition;
-            var myNormal = _currentGhostSurface.WorldNormal;
+            Vector3 targetPos = _currentTargetSurface.WorldPosition;
+            Vector3 targetNormal = -_currentTargetSurface.WorldNormal;
 
-            var targetPos = _currentTargetSurface.WorldPosition;
-            var targetNormal = _currentTargetSurface.WorldNormal;
+            Vector3 localNormal = _ghostLocalConnectorNormal.normalized;
+            Vector3 localPos = _ghostLocalConnectorPos;
 
-            var rot = Quaternion.FromToRotation(myNormal, -targetNormal);
-            ghostTr.rotation = rot * ghostTr.rotation;
+            Quaternion baseRot = Quaternion.FromToRotation(localNormal, targetNormal);
+            Quaternion spinRot = Quaternion.AngleAxis(_spinIndex * 90f, targetNormal);
+            Quaternion worldRot = spinRot * baseRot;
 
-            var delta = targetPos - myPos;
-            ghostTr.position += delta;
+            Vector3 worldPos = targetPos - worldRot * localPos;
+
+            ghostTr.SetPositionAndRotation(worldPos, worldRot);
         }
 
         private void SetGhostMaterial(Material mat)

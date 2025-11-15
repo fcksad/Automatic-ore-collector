@@ -204,14 +204,11 @@ public class ConnectorGridGenerator : MonoBehaviour
         var mask = Module.Occupancy != null ? Module.Occupancy.LocalCells : null;
         if (mask == null || mask.Length == 0) return;
 
-        // ћаксимальный размер сетки по конфигу Ц нужен только чтобы
-        // правильно вычислить "ноль" (левый-нижний-задний угол)
         Vector3Int grid = Module.GridSize;
         if (grid.x <= 0 || grid.y <= 0 || grid.z <= 0) return;
 
         Gizmos.matrix = transform.localToWorldMatrix;
 
-        // Ћокальный центр "€чейки (0,0,0)" Ч как и раньше в генераторе
         Vector3 origin =
             SourceCollider.center -
             new Vector3(
@@ -224,8 +221,6 @@ public class ConnectorGridGenerator : MonoBehaviour
 
         foreach (var c in mask)
         {
-            // предполагаем, что LocalCells заданы в тех же координатах,
-            // что и GridSize: (0..grid.x-1, 0..grid.y-1, 0..grid.z-1)
             Vector3 localCenter = origin + new Vector3(c.x * cell, c.y * cell, c.z * cell);
             Gizmos.DrawWireCube(localCenter, Vector3.one * cell);
         }

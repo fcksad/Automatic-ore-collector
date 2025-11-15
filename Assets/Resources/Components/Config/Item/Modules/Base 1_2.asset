@@ -15,7 +15,7 @@ MonoBehaviour:
   <Id>k__BackingField: Cabine
   <DisplayName>k__BackingField: Cabine
   <Prefab>k__BackingField: {fileID: 5571159996373376852, guid: 8158c09d864ab4d45bc4c6e0b89c4539, type: 3}
-  RotationMode: 1
+  RotationMode: 3
   CellSize: 0.25
   GridSize: {x: 1, y: 2, z: 1}
   Occupancy:
