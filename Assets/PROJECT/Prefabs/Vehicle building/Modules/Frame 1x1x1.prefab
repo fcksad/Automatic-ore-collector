@@ -474,9 +474,13 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5754084199372789682, guid: 9553d25771b2f5040950c390a74ae18a, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: -5495902117074765545, guid: 9553d25771b2f5040950c390a74ae18a, type: 3}
     - target: {fileID: 919132149155446097, guid: 9553d25771b2f5040950c390a74ae18a, type: 3}
       propertyPath: m_Name
-      value: BaseBox_1x1
+      value: Frame 1x1x1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 9553d25771b2f5040950c390a74ae18a, type: 3}
       propertyPath: m_Layer
@@ -600,9 +604,7 @@ MonoBehaviour:
   SourceCollider: {fileID: 4798477275082944083}
   DefaultType: 0
   FaceThickness: 0.01
-  ConectorLayer:
-    serializedVersion: 2
-    m_Bits: 0
+  ConnectorLayer: 12
   GenerateUp: 1
   GenerateDown: 1
   GenerateLeft: 1

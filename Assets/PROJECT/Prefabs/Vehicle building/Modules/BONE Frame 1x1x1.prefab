@@ -476,7 +476,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 9553d25771b2f5040950c390a74ae18a, type: 3}
       propertyPath: m_Name
-      value: BaseBox_1x1 (BONE)
+      value: BONE Frame 1x1x1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 9553d25771b2f5040950c390a74ae18a, type: 3}
       propertyPath: m_Layer
@@ -556,8 +556,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Outline
   _outlineMode: 0
-  _outlineColor: {r: 0.34901962, g: 0.9607843, b: 0.39607844, a: 1}
-  _outlineWidth: 3
+  _outlineColor: {r: 1, g: 0.15351717, b: 0, a: 1}
+  _outlineWidth: 5
   _precomputeOutline: 1
   _bakeKeys:
   - {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
@@ -619,9 +619,7 @@ MonoBehaviour:
   SourceCollider: {fileID: 5498312178010222568}
   DefaultType: 0
   FaceThickness: 0.01
-  ConectorLayer:
-    serializedVersion: 2
-    m_Bits: 0
+  ConnectorLayer: 12
   GenerateUp: 1
   GenerateDown: 1
   GenerateLeft: 1
