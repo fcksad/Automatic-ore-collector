@@ -44,7 +44,7 @@ namespace Builder
         private bool _prevVForward;
         private bool _prevVBackward;
 
-        private ConnectorSurface _currentTargetSurface;   
+        private ConnectorSurface _currentTargetSurface;
 
         private readonly List<ConnectorSurface> _ghostCandidates = new();
 
