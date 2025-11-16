@@ -10,7 +10,6 @@ namespace Builder
         [Header("World")]
         public Camera Cam;
         public Transform MountRoot;
-        public float CellSize = 0.25f;
 
         [Header("Ghost")]
         public Material OkMat;
@@ -55,9 +54,6 @@ namespace Builder
 
             if (!GridState)
                 GridState = FindObjectOfType<BuildGridState>();
-
-            if (GridState)
-                CellSize = GridState.CellSize;
 
             _input = ServiceLocator.Get<IInputService>();
         }

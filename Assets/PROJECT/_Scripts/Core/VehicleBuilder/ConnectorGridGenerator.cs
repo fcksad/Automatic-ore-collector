@@ -25,6 +25,8 @@ public class ConnectorGridGenerator : MonoBehaviour
     public bool GenerateForward = true;
     public bool GenerateBack = true;
 
+    public bool DrawDebugBox = false;
+
 #if UNITY_EDITOR
     [ContextMenu("Generate connectors from GridSize")]
     private void GenerateFromGrid()
@@ -44,7 +46,7 @@ public class ConnectorGridGenerator : MonoBehaviour
             return;
         }
 
-        float cell = Module.CellSize;
+        float cell = GridConfig.GridSize;
         if (cell <= 0f)
         {
             Debug.LogError("[ConnectorGridGenerator] Module.CellSize must be > 0", this);
@@ -192,13 +194,15 @@ public class ConnectorGridGenerator : MonoBehaviour
     }
     private void OnDrawGizmos()
     {
+        if (DrawDebugBox == false) return;
+
         if (Module == null) return;
 
         if (SourceCollider == null)
             SourceCollider = GetComponent<BoxCollider>();
         if (SourceCollider == null) return;
 
-        float cell = Module.CellSize;
+        float cell = GridConfig.GridSize;
         if (cell <= 0f) return;
 
         var mask = Module.Occupancy != null ? Module.Occupancy.LocalCells : null;

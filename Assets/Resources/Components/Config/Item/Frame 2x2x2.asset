@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9190f6ddce95d0b4684418d7c0d7fc70, type: 3}
-  m_Name: Frame 1x1x1
+  m_Name: Frame 2x2x2
   m_EditorClassIdentifier: 
   <Id>k__BackingField: 0
   <DisplayName>k__BackingField: A
@@ -19,4 +19,4 @@ MonoBehaviour:
   <Weight>k__BackingField: 0
   <Description>k__BackingField: 
   <MaxStack>k__BackingField: 1
-  Module: {fileID: 11400000, guid: cdedc2adf59da2b41a4241f00536fe3b, type: 2}
+  Module: {fileID: 11400000, guid: 88fd3de97ba7cbe47839acf4ef3ca887, type: 2}

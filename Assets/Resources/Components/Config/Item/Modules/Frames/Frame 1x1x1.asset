@@ -10,15 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 693553fd70246c04f8e1a898063cdcc8, type: 3}
-  m_Name: RegularWheele 2x1x1
+  m_Name: Frame 1x1x1
   m_EditorClassIdentifier: 
   <Id>k__BackingField: Cabine
   <DisplayName>k__BackingField: Cabine
-  <Prefab>k__BackingField: {fileID: 0}
+  <Prefab>k__BackingField: {fileID: 2423536176560312010, guid: 5bcd247baeeb8c840bacd34b137ffa8a, type: 3}
   RotationMode: 1
-  CellSize: 0.25
-  GridSize: {x: 2, y: 2, z: 2}
+  GridSize: {x: 1, y: 1, z: 1}
   Occupancy:
     LocalCells:
     - {x: 0, y: 0, z: 0}
-    - {x: 1, y: 0, z: 0}

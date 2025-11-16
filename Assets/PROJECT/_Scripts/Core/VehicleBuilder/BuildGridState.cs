@@ -3,24 +3,24 @@ using UnityEngine;
 
 namespace Builder
 {
+    public static class GridConfig
+    {
+        public static float GridSize = 0.125f;
+    }
+
     public class BuildGridState : MonoBehaviour
     {
         [Header("Grid")]
-        public float CellSize = 0.25f;
         public Transform Origin;
 
         public BuildGrid Grid { get; private set; }
 
         private readonly Dictionary<Vector3Int, Transform> _occupied = new();
 
-        [Header("Debug Gizmos")]
-        public bool DrawDebugGrid = true;
-        public int DebugRadius = 5;
-
         private void Awake()
         {
             if (!Origin) Origin = transform;
-            Grid = new BuildGrid(CellSize, Origin.position);
+            Grid = new BuildGrid(GridConfig.GridSize, Origin.position);
         }
 
         private void GetCellsForModule(ModuleConfig mod, Transform ghost, List<Vector3Int> result)
@@ -107,15 +107,13 @@ namespace Builder
         }
 
 #if UNITY_EDITOR
-        private void OnDrawGizmosSelected()
+        private void OnDrawGizmos()
         {
-            if (!DrawDebugGrid) return;
-
             if (!Origin) Origin = transform;
             if (Grid == null)
-                Grid = new BuildGrid(CellSize, Origin.transform.position);
+                Grid = new BuildGrid(GridConfig.GridSize, Origin.transform.position);
 
-            float s = CellSize;
+            float s = GridConfig.GridSize;
 
             Gizmos.color = new Color(0f, 1f, 1f, 0.1f);
 
